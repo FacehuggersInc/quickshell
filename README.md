@@ -167,6 +167,27 @@ ghostty --version          # Terminal
 
 ---
 
+## System Tray
+
+The bar includes a system tray powered by Quickshell's `SystemTray` service. It automatically shows and hides based on whether any tray items are present.
+
+**Supported interactions:**
+- **Left click** — activates the tray item (e.g. show/hide the app)
+- **Right click** — opens the item's native context menu
+
+**Dependencies** — the tray works out of the box with Quickshell. Apps that register a tray icon via the StatusNotifierItem protocol will appear automatically. Common ones include:
+
+```
+flameshot       # shows in tray when running
+blueman-applet  # bluetooth tray (optional alternative to the built-in BT panel)
+nm-applet       # network manager tray (optional)
+udiskie         # USB automount tray (optional)
+```
+
+No extra packages required — `Quickshell.Services.SystemTray` is part of Quickshell itself.
+
+---
+
 ## Quick Reference — Settings Panel Features
 
 | Feature | Command Used |
