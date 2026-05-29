@@ -170,7 +170,7 @@ Item {
                         Layout.fillWidth: true
                     }
                     Text {
-                        text: "Each line becomes one launch option set. Args split by spaces."
+                        text: "The Custom Sets of args that will allow quick launching of the Launch Command + Args in the context menu of a pinned app. \nEach set is a string split by spaces, this becomes the Args to launch with"
                         color: root.settings.theme.text
                         opacity: 0.45
                         font.family: root.settings.fontFamily
@@ -215,7 +215,7 @@ Item {
                                 anchors.fill: parent
                                 anchors.margins: 6
                                 text: model.value
-                                placeholderText: "e.g. --new-window /home/fach/project"
+                                placeholderText: "e.g. --new-window /home/{user}/project"
                                 color: root.settings.theme.text
                                 font.family: root.settings.fontFamily
                                 font.pixelSize: 13
