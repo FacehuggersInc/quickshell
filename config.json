@@ -21,11 +21,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#330017",
-        "surface": "#46042a",
-        "primary": "#81526e",
-        "secondary": "#6e3a56",
-        "text": "#e5d8f0"
+        "background": "#0e0e0e",
+        "surface": "#252120",
+        "primary": "#715c58",
+        "secondary": "#564744",
+        "text": "#ffcfc5"
     },
     "launcherflags": {
         "maxOptions": 3,

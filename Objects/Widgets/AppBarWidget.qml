@@ -1476,6 +1476,7 @@ RoundedBlock{
             Layout.preferredWidth: 32
             Layout.preferredHeight: 32
             font.family: root.settings.fontFamily
+            radius: 6
 
             background: Rectangle {
                 radius: addAppButton.radius
@@ -1484,7 +1485,7 @@ RoundedBlock{
                     : "transparent"
                 opacity: addHovMain.hovered ? 0.25 : 0.4
                 border.color: root.settings.theme.text
-                border.width: 1
+                border.width: 2
             }
 
             contentItem: Text {

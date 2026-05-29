@@ -26,7 +26,10 @@ IconButton {
     }
 
     function onNewNotification(notif) {
-        if (!notif || notif.lastGeneration) return
+        if (!notif || notif.lastGeneration) {
+            notifyWidget.updateBadge()
+            return
+        }
 
         notif.tracked = true
 
@@ -36,7 +39,7 @@ IconButton {
         notificationPopup.setPopupIcon(root.notifyServer.iconName)
         notificationPopup.toggle()
 
-        updateBadge()
+        notifyWidget.updateBadge()
     }
 
     function updateBadge() {
@@ -57,5 +60,8 @@ IconButton {
         function onObjectRemoved()  { notifyWidget.updateBadge() }
     }
 
-    onClicked: notificationsPanel.toggle(notifyWidget)
+    onClicked: {
+        updateBadge()
+        notificationsPanel.toggle(notifyWidget)
+    }
 }
