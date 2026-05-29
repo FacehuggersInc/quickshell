@@ -1,0 +1,196 @@
+{
+    "wallpapers": {
+        "darkModeHours": {
+            "before": 8,
+            "at": 24
+        },
+        "displays": [
+            "DP-2",
+            "HDMI-A-1",
+            "DP-1"
+        ],
+        "primaryDisplayIndex": 1,
+        "randomWallpaperPerDisplay": true,
+        "interval": 1800000,
+        "day": "/home/fach/Pictures/Wallpapers/Day/",
+        "night": "/home/fach/Pictures/Wallpapers/Night/",
+        "setWallpaperCommand": "awww img -o {display} {wallpaper}"
+    },
+    "iconsPath": "/home/fach/.local/share/icons/material/",
+    "volumePercentageOffset": 0,
+    "fontFamily": "JetBrainsMono",
+    "theme": {
+        "mode": "dark",
+        "background": "#330017",
+        "surface": "#46042a",
+        "primary": "#81526e",
+        "secondary": "#6e3a56",
+        "text": "#e5d8f0"
+    },
+    "launcherflags": {
+        "maxOptions": 3,
+        "filters": {
+            "org.gnome.Nautilus": [
+                "--gapplication-service"
+            ]
+        },
+        "setOptions": {},
+        "lockOptions": [
+            "brave-cinhimbnkkaeohfgghhklpknlkffjgod-Default",
+            "brave-chcecgcbjkilfgeccdhoeaillkophnhg-Default"
+        ],
+        "ignoreOptions": [
+            "steam",
+            "brave-browser",
+            "BattleNet",
+            "net.lutris.Lutris",
+            "discord"
+        ]
+    },
+    "launchers": [
+        {
+            "name": "code",
+            "nickname": "Visual Studio Code",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/code.svg",
+            "command": "/opt/visual-studio-code/code",
+            "options": [
+                [
+                    "/home/fach/.config/quickshell/"
+                ],
+                [
+                    "/mnt/ssd-games/SteamLibrary/steamapps/workshop/content/108600/2877685881/mods/FactionAnnotations/media/lua/shared/FactionAnnotations.shared.lua"
+                ],
+                [
+                    "/home/fach/Zomboid/coop-console.txt"
+                ]
+            ]
+        },
+        {
+            "name": "com.mitchellh.ghostty",
+            "nickname": "Ghostty",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/com.mitchellh.ghostty.svg",
+            "command": "ghostty",
+            "options": [
+                [
+                    "-e",
+                    "tail",
+                    "-f"
+                ],
+                [
+                    "-e",
+                    "journalctl",
+                    "--user",
+                    "-u",
+                    "quickshell",
+                    "-f"
+                ]
+            ]
+        },
+        {
+            "name": "brave-browser",
+            "nickname": "Brave",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/brave-browser.svg",
+            "command": "/opt/brave-bin/brave",
+            "options": []
+        },
+        {
+            "name": "discord",
+            "nickname": "Discord",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/discord.svg",
+            "command": "/app/discord/Discord",
+            "options": []
+        },
+        {
+            "name": "brave-cinhimbnkkaeohfgghhklpknlkffjgod-Default",
+            "nickname": "Youtube Music",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/brave-cinhimbnkkaeohfgghhklpknlkffjgod-Default.svg",
+            "command": "/opt/brave-bin/brave",
+            "options": [
+                [
+                    "--profile-directory=Default",
+                    "--app-id=cinhimbnkkaeohfgghhklpknlkffjgod"
+                ]
+            ]
+        },
+        {
+            "name": "brave-chcecgcbjkilfgeccdhoeaillkophnhg-Default",
+            "nickname": "Xbox Cloud Gaming",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/brave-chcecgcbjkilfgeccdhoeaillkophnhg-Default.svg",
+            "command": "/opt/brave-bin/brave",
+            "options": [
+                [
+                    "--profile-directory=Default",
+                    "--app-id=chcecgcbjkilfgeccdhoeaillkophnhg"
+                ]
+            ]
+        },
+        {
+            "name": "steam",
+            "nickname": "Steam",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/steam.svg",
+            "command": "steam",
+            "options": []
+        },
+        {
+            "name": "BattleNet",
+            "icon": "/home/fach/.local/share/icons/hicolor/128x128/apps/lutris_battlenet.png",
+            "command": "gio launch /home/fach/.local/share/applications/net.lutris.diablo-iv-2.desktop",
+            "masque": {
+                "classIncludes": "",
+                "cmdIncludes": "Battle.net"
+            }
+        },
+        {
+            "name": "org.gnome.SystemMonitor",
+            "nickname": "System Monitor",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/org.gnome.SystemMonitor.svg",
+            "command": "gnome-system-monitor",
+            "options": []
+        },
+        {
+            "name": "org.gnome.Nautilus",
+            "nickname": "Files",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/org.gnome.Nautilus.svg",
+            "command": "nautilus",
+            "options": [
+                [
+                    "/home/fach/.local/share/icons/material/"
+                ],
+                [
+                    "(Ex",
+                    "SSD)"
+                ]
+            ]
+        },
+        {
+            "name": "input-remapper-gtk",
+            "nickname": "Input Remapper",
+            "icon": "/usr/share/icons/hicolor/scalable/apps/input-remapper.svg",
+            "command": "/usr/bin/input-remapper-gtk",
+            "options": []
+        },
+        {
+            "name": "net.lutris.Lutris",
+            "icon": "/usr/share/icons/hicolor/128x128/apps/net.lutris.Lutris.png",
+            "command": "/usr/bin/lutris",
+            "options": []
+        },
+        {
+            "name": "org.prismlauncher.PrismLauncher",
+            "nickname": "",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/org.prismlauncher.PrismLauncher.svg",
+            "command": "/app/bin/prismrun",
+            "options": []
+        },
+        {
+            "name": "godot",
+            "nickname": "Godot Engine",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/godot.svg",
+            "command": "godot",
+            "options": [],
+            "masque": {
+                "classIncludes": "Godot"
+            }
+        }
+    ]
+}
