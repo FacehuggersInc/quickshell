@@ -148,46 +148,6 @@ You should see `video`, `storage`, `i2c`, and `bluetooth` in the output.
 
 ---
 
-## Git Setup (for uploading to GitHub)
-
-```bash
-sudo pacman -S git
-
-# Set identity
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
-
-# Generate SSH key
-ssh-keygen -t ed25519 -C "you@example.com"
-
-# Copy public key and add to GitHub → Settings → SSH keys
-cat ~/.ssh/id_ed25519.pub
-
-# Test connection
-ssh -T git@github.com
-```
-
-Push your config:
-```bash
-cd ~/.config/quickshell
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin git@github.com:yourusername/yourrepo.git
-git push -u origin main
-```
-
-Recommended `.gitignore` in your quickshell config root:
-```
-.icon-cache
-__pycache__/
-*.pyc
-config.json        # optional — contains your personal theme/settings
-```
-
----
-
 ## Post-Install Verification
 
 Run these after a fresh login to confirm everything is working:
