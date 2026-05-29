@@ -22,14 +22,11 @@ IconButton {
     }
 
     NotificationPopup {
-        id: notificationPopup 
+        id: notificationPopup
     }
 
     function onNewNotification(notif) {
-        if (!notif || notif.lastGeneration) {
-            notifyWidget.updateBadge()
-            return
-        }
+        if (!notif || notif.lastGeneration) return
 
         notif.tracked = true
 
@@ -39,7 +36,8 @@ IconButton {
         notificationPopup.setPopupIcon(root.notifyServer.iconName)
         notificationPopup.toggle()
 
-        notifyWidget.updateBadge()
+        // Update badge immediately on new notification
+        updateBadge()
     }
 
     function updateBadge() {
@@ -54,14 +52,21 @@ IconButton {
         }
     }
 
+    // Poll count reactively — catches dismissals and any missed signals
+    Timer {
+        id: badgePoller
+        interval: 500
+        repeat: true
+        running: true
+        onTriggered: notifyWidget.updateBadge()
+    }
+
+    // Also wire object signals as a fast path for immediate updates
     Connections {
         target: root.notifyServer.trackedNotifications
         function onObjectInserted() { notifyWidget.updateBadge() }
         function onObjectRemoved()  { notifyWidget.updateBadge() }
     }
 
-    onClicked: {
-        updateBadge()
-        notificationsPanel.toggle(notifyWidget)
-    }
+    onClicked: notificationsPanel.toggle(notifyWidget)
 }

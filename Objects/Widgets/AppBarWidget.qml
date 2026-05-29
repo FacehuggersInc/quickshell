@@ -514,6 +514,15 @@ RoundedBlock{
             )
         }
 
+        // Send to workspace — for active apps only
+        if (contextTarget.type.includes("active")) {
+            items.push({
+                "name": "Send to workspace...",
+                "action": "workspace:send",
+                "icon": "home"
+            })
+        }
+
         // Masque options
         var currentMasque = getAppMasque(contextTarget.name)
         if (currentMasque !== "") {
@@ -1069,6 +1078,13 @@ RoundedBlock{
                             }
                         } else if (modelData.action === "toggleOptions"){
                             toggleNoOptions(contextTarget.name)
+                        } else if (modelData.action === "workspace:send") {
+                            var pids = getPIDs(contextTarget.name)
+                            workspaceSendPopup.targetPid   = pids.length > 0 ? pids[0] : ""
+                            workspaceSendPopup.targetClass = contextTarget.name
+                            popup.forceClose()
+                            workspaceSendPopup.forceOpen(appBarWidget)
+                            return
                         } else if (modelData.action === "masque:open") {
                             popup.forceClose()
                             masquePopup.forceOpen(appBarWidget)
@@ -1268,16 +1284,30 @@ RoundedBlock{
             anchors.fill: parent
             spacing: 0
 
-            Text {
-                text: "Remove masque:"
-                color: root.settings.theme.text
-                opacity: 0.55
-                font.family: root.settings.fontFamily
-                font.pixelSize: 12
-                font.weight: 600
+            RowLayout {
+                Layout.fillWidth: true
                 Layout.leftMargin: 10
+                Layout.rightMargin: 6
                 Layout.topMargin: 6
                 Layout.bottomMargin: 2
+
+                Text {
+                    text: "Remove masque:"
+                    color: root.settings.theme.text
+                    opacity: 0.55
+                    font.family: root.settings.fontFamily
+                    font.pixelSize: 12
+                    font.weight: 600
+                    Layout.fillWidth: true
+                }
+
+                IconButton {
+                    iconName: "close"
+                    iconSize: 14
+                    color: root.settings.theme.text
+                    tooltipText: "Cancel"
+                    onClicked: masqueManagePopup.forceClose()
+                }
             }
 
             Repeater {
@@ -1331,6 +1361,11 @@ RoundedBlock{
         }
     }
 
+    // -- WORKSPACE SEND POPUP
+    WorkspaceSendPopup {
+        id: workspaceSendPopup
+    }
+
     // -- WIDGET ROW
     RowLayout{
         id: row
@@ -1343,7 +1378,7 @@ RoundedBlock{
 
             function openAndSet(text, point){
                 tooltip.text = text
-                tooltip.toggleOnTo(point)
+                tooltip.showAt(point)
             }
         }
 
@@ -1425,11 +1460,15 @@ RoundedBlock{
                     HoverHandler {
                         id:hoverHandler
                         cursorShape: Qt.PointingHandCursor
-                        onHoveredChanged : {
-                            tooltip.openAndSet(
-                                button.nickname ? button.nickname : button.name,
-                                hoverHandler.point
-                            )
+                        onHoveredChanged: {
+                            if (hovered) {
+                                tooltip.openAndSet(
+                                    button.nickname ? button.nickname : button.name,
+                                    hoverHandler.point
+                                )
+                            } else {
+                                tooltip.hide()
+                            }
                         }
                     }
                 }
@@ -1476,7 +1515,6 @@ RoundedBlock{
             Layout.preferredWidth: 32
             Layout.preferredHeight: 32
             font.family: root.settings.fontFamily
-            radius: 6
 
             background: Rectangle {
                 radius: addAppButton.radius
@@ -1485,7 +1523,7 @@ RoundedBlock{
                     : "transparent"
                 opacity: addHovMain.hovered ? 0.25 : 0.4
                 border.color: root.settings.theme.text
-                border.width: 2
+                border.width: 1
             }
 
             contentItem: Text {

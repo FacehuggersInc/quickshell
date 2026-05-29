@@ -1,46 +1,41 @@
-import Quickshell
-import Quickshell.Io
 import QtQuick
-import Quickshell.Widgets
-import QtQuick.Layouts
+import Quickshell
 
 import qs.Objects.Design
 
-PopupWindow {
+Item {
     id: tooltip
-    property string text: "Tooltip"
-    property HoverHandler hoverManager
+    property string text: ""
+    property var hoverManager: null
 
-    anchor.window: mainWindow
-    anchor.rect.x: 0
-    anchor.rect.y: mainWindow.height
-    color: "transparent"
-    visible: false
-
-    implicitWidth: (tooltip.text.length * 16) + 15
-    implicitHeight: 35
-
-    RoundedBlock{
-        color: root.settings.theme.surface
-        alpha: 1.0
-        Text {
-            text: tooltip.text
-            color: root.settings.theme.text
-            font.family: root.settings.fontFamily
-            font.weight: 500
-            font.pixelSize: 16
-        }
+    function showAt(point) {
+        if (!tooltip.text) return
+        // scenePosition.x is relative to the window root.
+        // For mainWindow (PanelWindow spanning full width) this equals screen x.
+        // For PopupWindows we add anchor.rect.x to get the true screen x.
+        var x = point.scenePosition.x + getWindowOffsetX()
+        tooltipWindow.show(tooltip.text, x)
     }
 
-    function updatePosition(point){
-        tooltip.anchor.rect.x = mapToItem(tooltip.parent, point.position.x, point.position.y).x
-    }    
+    function getWindowOffsetX() {
+        // Walk up the QML parent chain looking for a PopupWindow
+        // (identified by having an anchor property and not being mainWindow)
+        // PopupWindows are NOT in the QML parent chain of their content —
+        // so we check if our nearest Window ancestor differs from mainWindow
+        // by comparing the window property of our parent item
+        if (!tooltip.parent) return 0
+        var w = tooltip.parent.Window.window
+        if (!w || w === mainWindow) return 0
+        // w is a PopupWindow — get its screen x from anchor.rect.x
+        if (w.anchor && w.anchor.rect) return w.anchor.rect.x || 0
+        return 0
+    }
 
-    function toggleOnTo(position) {
-        if (!text) { return }
-        updatePosition(position)
-        tooltip.visible = tooltip.visible ? false : true
+    function hide() {
+        tooltipWindow.hide()
+    }
+
+    function toggleOnTo(point) {
+        showAt(point)
     }
 }
-
-

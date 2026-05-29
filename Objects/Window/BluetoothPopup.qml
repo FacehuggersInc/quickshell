@@ -34,6 +34,17 @@ PopupWindow {
     property bool scanning: false
     property var pairedDevices: []
     property var scanResults: []
+    property string connectingMac: ""   // MAC of device currently connecting
+    property real connectingRotation: 0  // shared rotation value for all spin icons
+
+    // Root-level timer drives rotation independently of popup visibility
+    Timer {
+        id: spinTimer
+        interval: 16   // ~60fps
+        repeat: true
+        running: bluetoothPopup.connectingMac !== ""
+        onTriggered: bluetoothPopup.connectingRotation = (bluetoothPopup.connectingRotation + 6) % 360
+    }
 
     // ── Animations ────────────────────────────────────────────────
     PropertyAnimation {
@@ -151,8 +162,24 @@ PopupWindow {
     }
 
     Process { id: powerProc;      stdout: StdioCollector { onStreamFinished: { fetchState(); fetchDevices() } } }
-    Process { id: connectProc;    stdout: StdioCollector { onStreamFinished: { fetchDevices() } } }
-    Process { id: disconnectProc; stdout: StdioCollector { onStreamFinished: { fetchDevices() } } }
+    Process {
+        id: connectProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                bluetoothPopup.connectingMac = ""
+                fetchDevices()
+            }
+        }
+    }
+    Process {
+        id: disconnectProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                bluetoothPopup.connectingMac = ""
+                fetchDevices()
+            }
+        }
+    }
     Process { id: forgetProc;     stdout: StdioCollector { onStreamFinished: { fetchDevices() } } }
     Process { id: pairProc;       stdout: StdioCollector { onStreamFinished: { fetchDevices(); fetchScanResults() } } }
     Process { id: scanProc }
@@ -178,11 +205,20 @@ PopupWindow {
     }
 
     function connectDevice(mac, name) {
+        bluetoothPopup.connectingMac = mac
+        root.execute([
+            "notify-send",
+            "--app-name=Bluetooth",
+            "--urgency=low",
+            "Bluetooth",
+            "Connecting to " + name + "..."
+        ])
         connectProc.command = root.newUtill(["--btconnect", mac, name])
         connectProc.running = true
     }
 
     function disconnectDevice(mac, name) {
+        bluetoothPopup.connectingMac = mac
         disconnectProc.command = root.newUtill(["--btdisconnect", mac, name])
         disconnectProc.running = true
     }
@@ -399,25 +435,50 @@ PopupWindow {
                                     }
                                 }
 
-                                // Connect / Disconnect button
+                                // Connect / Disconnect button — shows spinner while connecting
                                 RoundButton {
-                                    text: modelData.connected ? "Disconnect" : "Connect"
+                                    id: connectBtn
+                                    property bool isConnecting: bluetoothPopup.connectingMac === modelData.mac
+                                    text: isConnecting ? "..." : (modelData.connected ? "Disconnect" : "Connect")
+                                    enabled: !isConnecting
                                     font.family: root.settings.fontFamily
                                     font.pixelSize: 12
                                     padding: 4
                                     horizontalPadding: 10
-                                    contentItem: Text {
-                                        text: parent.text
-                                        font: parent.font
-                                        color: root.settings.theme.text
-                                        horizontalAlignment: Text.AlignHCenter
+
+                                    contentItem: RowLayout {
+                                        spacing: 4
+                                        // Spinning icon while connecting
+                                        Image {
+                                            visible: connectBtn.isConnecting
+                                            source: root.iconSource("sync")
+                                            width: 14; height: 14
+                                            sourceSize.width: 14; sourceSize.height: 14
+                                            fillMode: Image.PreserveAspectFit
+
+                                            RotationAnimation on rotation {
+                                                running: connectBtn.isConnecting
+                                                loops: Animation.Infinite
+                                                from: 0; to: 360
+                                                duration: 1000
+                                            }
+                                        }
+                                        Text {
+                                            text: connectBtn.text
+                                            font: connectBtn.font
+                                            color: root.settings.theme.text
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
                                     }
+
                                     background: Rectangle {
                                         radius: 6
-                                        color: modelData.connected
-                                            ? "#555555"
-                                            : root.settings.theme.primary
-                                        opacity: 0.7
+                                        color: connectBtn.isConnecting
+                                            ? root.settings.theme.surface
+                                            : modelData.connected
+                                                ? "#555555"
+                                                : root.settings.theme.primary
+                                        opacity: connectBtn.isConnecting ? 0.5 : 0.7
                                     }
                                     HoverHandler { cursorShape: Qt.PointingHandCursor }
                                     onClicked: {

@@ -13,6 +13,11 @@ import qs.Objects.Widgets
 
 PanelWindow {
     id: mainWindow
+
+    // Shared tooltip window — all Tooltip items delegate here
+    TooltipWindow {
+        id: tooltipWindow
+    }
     anchors {
         top: true
         left: true
@@ -33,16 +38,31 @@ PanelWindow {
         }
         topPadding: mainWindow.padding
 
-        //LEFT MODULES
+        // LEFT MODULES
         Row {
             anchors.left: parent.left
             anchors.leftMargin: mainWindow.padding
+            anchors.verticalCenter: parent.verticalCenter
             spacing: mainWindow.spacing
+
+            RoundedBlock {
+                id: leftModules
+                anchors.verticalCenter: parent.verticalCenter
+                sidePadding: 15
+                tbPadding: 0
+                // Match implicit height to rightModules so they look the same
+                implicitHeight: rightModules.implicitHeight
+
+                WorkspaceSwitcherWidget {
+                    anchors.centerIn: parent
+                }
+            }
         }
         
         // CENTER MODULES
         Row{
             anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
             spacing: mainWindow.spacing
 
             AppBarWidget{
@@ -55,6 +75,7 @@ PanelWindow {
         Row{
             anchors.right: parent.right
             anchors.rightMargin: mainWindow.padding
+            anchors.verticalCenter: parent.verticalCenter
             spacing: mainWindow.spacing
 
             SystemTray {
@@ -70,11 +91,11 @@ PanelWindow {
                     VolumeWidget {}
                     InterfaceWidget {}
                     DatetimeWidget { 
-                        format: "%I:%M%p %a, %b %d" 
+                        format: "%I:%M%p %a, %b %d"
                         textColor: '#7be376'
                     }
                     NotificationsWidget {}
-                    BluetoothWidget {}
+                    ColorPickerWidget {}
                     IconButton{
                         id: settingsIconButton
                         iconName: "settings"

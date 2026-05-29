@@ -1,4 +1,3 @@
-
 import QtQuick
 import Quickshell
 import QtQuick.Controls
@@ -27,14 +26,17 @@ RoundButton {
     Tooltip {
         id: tooltip
         text: button.tooltipText
-        hoverManager: hoverHandler
     }
 
     HoverHandler {
-        id:hoverHandler
+        id: hoverHandler
         cursorShape: Qt.PointingHandCursor
-        onHoveredChanged : {
-            tooltip.toggleOnTo(hoverHandler.point)
+        onHoveredChanged: {
+            if (hovered) {
+                tooltip.showAt(hoverHandler.point)
+            } else {
+                tooltip.hide()
+            }
             button.hoveredEvent(hoverHandler.point)
         }
     }
@@ -66,5 +68,4 @@ RoundButton {
         button.color = color
         Material.foreground = color
     }
-
 }

@@ -85,6 +85,32 @@ PopupWindow {
         }
     }
 
+    // ── Color Picker ─────────────────────────────────────────────────────────
+    Process {
+        id: colorPickerProc
+        command: ["hyprpicker"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var color = this.text.trim()
+                if (!color.match(/^#[0-9a-fA-F]{6}$/i)) return
+                Quickshell.clipboardText = color
+                addColorFromSettingsProc.command = root.newUtill(["--addcolor", color])
+                addColorFromSettingsProc.running = true
+            }
+        }
+    }
+
+    Process {
+        id: addColorFromSettingsProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var list = this.text.trim().split(",").filter(function(c) { return c !== "" })
+                root.settings.colorHistory = list
+                root.saveSettings()
+            }
+        }
+    }
+
     function fetchBrightness() {
         if (!detectProc.running)        detectProc.running = true
         if (!brightnessGetProc.running) brightnessGetProc.running = true
@@ -116,15 +142,20 @@ PopupWindow {
                     var devices = data["blockdevices"] || []
                     for (var i = 0; i < devices.length; i++) {
                         var dev = devices[i]
-                        // Only hotplug devices (USB)
-                        if (!dev.hotplug) continue
-                        // Check top-level and children for mounted partitions
+                        // hotplug can be true, "1", or 1 depending on lsblk version
+                        var isHotplug = dev.hotplug === true
+                            || dev.hotplug === "1"
+                            || dev.hotplug === 1
+                        if (!isHotplug) continue
                         var check = [dev].concat(dev.children || [])
                         for (var j = 0; j < check.length; j++) {
                             var part = check[j]
-                            if (part.mountpoint && part.mountpoint !== "") {
+                            if (part.mountpoint && part.mountpoint !== ""
+                                    && part.mountpoint !== null) {
                                 drives.push({
-                                    label: part.label || part.name || "USB Drive",
+                                    label: part.label && part.label !== ""
+                                        ? part.label
+                                        : part.name || "USB Drive",
                                     mountpoint: part.mountpoint
                                 })
                             }
@@ -132,10 +163,20 @@ PopupWindow {
                     }
                     generalSettingsPopup.usbDrives = drives
                 } catch(e) {
+                    console.log("USB detect error: " + e)
                     generalSettingsPopup.usbDrives = []
                 }
             }
         }
+    }
+
+    // Refresh USB list every 3s while popup is open
+    Timer {
+        id: usbRefreshTimer
+        interval: 3000
+        repeat: true
+        running: false
+        onTriggered: fetchUSB()
     }
 
     function fetchUSB() {
@@ -392,8 +433,10 @@ PopupWindow {
                 ActionRow {
                     iconName: "copy_content"
                     label: "Color Picker"
-                    description: "hyprpicker -a"
-                    onClicked: root.execute(["hyprpicker", "-a"])
+                    description: colorPickerProc.running ? "picking..." : "hyprpicker"
+                    onClicked: {
+                        if (!colorPickerProc.running) colorPickerProc.running = true
+                    }
                 }
                 ActionRow {
                     iconName: "screenshot"
@@ -483,6 +526,7 @@ PopupWindow {
         focusGrab.active = true
         fetchBrightness()
         fetchUSB()
+        usbRefreshTimer.start()
     }
 
     function forceClose() {
@@ -492,6 +536,7 @@ PopupWindow {
         alphaAnim.to = 0
         alphaAnim.start()
         focusGrab.active = false
+        usbRefreshTimer.stop()
     }
 
     function toggle(widget) {

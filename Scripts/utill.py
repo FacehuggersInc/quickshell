@@ -649,6 +649,66 @@ class Utill():
     def generatetheme(self, *args):
         return build_theme(args[1:], args[0])
 
+    # ── COLOR HISTORY ────────────────────────────────────────────────────────
+
+    @argfunc
+    def addcolor(self, *args):
+        """Add a hex color to history in config.json colorHistory array.
+        Keeps last 10, deduplicates. Args: hex color (e.g. #ff00aa)
+        Returns the updated comma-separated color list.
+        """
+        if not args: return ""
+        color = args[0].strip().lower()
+        if not color.startswith("#"): color = "#" + color
+
+        config_path = Path("/home/fach/.config/quickshell/config.json")
+        try:
+            with open(config_path, "r") as f:
+                config = json.load(f)
+        except Exception:
+            return ""
+
+        history = config.get("colorHistory", [])
+
+        # Deduplicate — remove if already exists so it moves to front
+        history = [c for c in history if c.lower() != color]
+        history.insert(0, color)
+        history = history[:10]
+
+        config["colorHistory"] = history
+
+        with open(config_path, "w") as f:
+            json.dump(config, f, indent=4)
+
+        return ",".join(history)
+
+    @argfunc
+    def getcolors(self, *args):
+        """Get color history from config.json.
+        Returns comma-separated hex colors.
+        """
+        config_path = Path("/home/fach/.config/quickshell/config.json")
+        try:
+            with open(config_path, "r") as f:
+                config = json.load(f)
+            return ",".join(config.get("colorHistory", []))
+        except Exception:
+            return ""
+
+    @argfunc
+    def clearcolors(self, *args):
+        """Clear color history."""
+        config_path = Path("/home/fach/.config/quickshell/config.json")
+        try:
+            with open(config_path, "r") as f:
+                config = json.load(f)
+            config["colorHistory"] = []
+            with open(config_path, "w") as f:
+                json.dump(config, f, indent=4)
+        except Exception:
+            pass
+        return ""
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]

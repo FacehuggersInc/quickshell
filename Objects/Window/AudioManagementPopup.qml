@@ -30,6 +30,13 @@ PopupWindow {
 
     mask: Region { item: background }
 
+    // Catch clicks outside the panel and close
+    MouseArea {
+        anchors.fill: parent
+        z: -1
+        onClicked: volumeSettingsPopup.forceClose()
+    }
+
     property bool isClosing: false
 
     PropertyAnimation {
@@ -179,6 +186,12 @@ PopupWindow {
         color: root.settings.theme.background
         opacity: 0
         clip: true
+
+        // Eat mouse events so clicks inside don't dismiss the popup
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {}  // consume without closing
+        }
 
         layer.enabled: true
         layer.effect: DropShadow {
