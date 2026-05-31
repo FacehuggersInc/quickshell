@@ -94,8 +94,9 @@ PanelWindow {
                         format: "%I:%M%p %a, %b %d"
                         textColor: '#7be376'
                     }
-                    NotificationsWidget {}
                     ColorPickerWidget {}
+                    BluetoothWidget {}
+                    NotificationsWidget {}
                     IconButton{
                         id: settingsIconButton
                         iconName: "settings"

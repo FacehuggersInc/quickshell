@@ -21,11 +21,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#0e0d10",
-        "surface": "#252024",
-        "primary": "#705c62",
-        "secondary": "#55474c",
-        "text": "#ffcedc"
+        "background": "#280000",
+        "surface": "#3a1614",
+        "primary": "#7c584a",
+        "secondary": "#664137",
+        "text": "#f4d7b5"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -91,13 +91,6 @@
             "nickname": "Brave",
             "icon": "/usr/share/icons/Papirus/64x64/apps/brave-browser.svg",
             "command": "/opt/brave-bin/brave",
-            "options": []
-        },
-        {
-            "name": "discord",
-            "nickname": "Discord",
-            "icon": "/usr/share/icons/Papirus/64x64/apps/discord.svg",
-            "command": "/app/discord/Discord",
             "options": []
         },
         {
@@ -191,9 +184,17 @@
             "masque": {
                 "classIncludes": "Godot"
             }
+        },
+        {
+            "name": "discord",
+            "nickname": "",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/discord.svg",
+            "command": "/app/discord/Discord",
+            "options": []
         }
     ],
     "colorHistory": [
+        "#342e05",
         "#141414",
         "#799c56"
     ]
