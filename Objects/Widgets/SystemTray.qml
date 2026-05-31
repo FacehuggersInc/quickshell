@@ -1,4 +1,3 @@
-
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -37,7 +36,6 @@ RoundedBlock {
 
                 property var item: modelData
 
-            
                 MouseArea {
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -46,7 +44,6 @@ RoundedBlock {
                             item.activate()
                         } else if (mouse.button == Qt.RightButton){
                             menuOpener.menu = item.menu
-                            // Map the click coordinates to the mainWindow's coordinate system
                             let mappedPoint = mapToItem(mainWindow.contentItem, mouse.x, mouse.y)
                             item.display(
                                 mainWindow, 
@@ -66,14 +63,17 @@ RoundedBlock {
                         Tooltip {
                             id: tooltip
                             text: item.title ? item.title : "Tray App"
-                            hoverManager: hoverHandler
                         }
 
                         HoverHandler {
-                            id:hoverHandler
+                            id: hoverHandler
                             cursorShape: Qt.PointingHandCursor
-                            onHoveredChanged : {
-                                tooltip.toggleOnTo(hoverHandler.point)
+                            onHoveredChanged: {
+                                if (hovered) {
+                                    tooltip.showAt(hoverHandler.point)
+                                } else {
+                                    tooltip.hide()
+                                }
                             }
                         }
                     }

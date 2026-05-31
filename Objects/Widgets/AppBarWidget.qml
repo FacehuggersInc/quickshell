@@ -471,7 +471,7 @@ RoundedBlock{
         }
     }
 
-    function openContextMenu(attachTo){
+    function openContextMenu(popupObject){
         var contextHiddenCount = getHiddenCount(contextTarget.name)
         var contextIsPinned = isAppPinned(contextTarget.name)
         var items = [
@@ -528,14 +528,14 @@ RoundedBlock{
         if (currentMasque !== "") {
             // This app is masquing under another — offer to remove
             items.push({
-                "name": "Remove Masque From (" + currentMasque + ")", 
+                "name": "Remove Masque (" + currentMasque + ")",
                 "action": "masque:remove",
                 "icon": "masked"
             })
         } else {
             // Not masquing — offer to set one
             items.push({
-                "name": "Masque under Another ...",
+                "name": "Add as Masque...",
                 "action": "masque:open",
                 "icon": "masked_add"
             })
@@ -586,7 +586,7 @@ RoundedBlock{
             popup.actions.append(items[i])
         }
         popup.height = (items.length * 35) 
-        popup.forceOpen(attachTo)
+        popup.forceOpen(popupObject)
     }
 
     //CONTEXT MENU ACTIONS
@@ -664,16 +664,12 @@ RoundedBlock{
         }
     }
 
-    function appHasLockOptionsFlag(name){
-        return root.settings.launcherflags.lockOptions.includes(name)
-    }
-
     function appHasNoOptionsFlag(name){
         return root.settings.launcherflags.ignoreOptions.includes(name)
     }
 
     function toggleNoOptions(name){
-        if (appHasLockOptionsFlag(name)) return
+        if (root.settings.launcherflags.lockOptions.includes(name)) return
         if (appHasNoOptionsFlag(name)) {
             for (var j = 0; j < root.settings.launcherflags.ignoreOptions.length; j++){
                 if (name === root.settings.launcherflags.ignoreOptions[j]){
@@ -843,267 +839,98 @@ RoundedBlock{
     } 
 
     // -- LAUNCHER POPUP
-    PopupPanel{
+    AppBarLaunchPopup {
         id: launchPopup
-        implicitHeight: 45
-        implicitWidth: 575
-        sidePadding: 0
-        fadingEffectMax: 1.0
-        requireFocusGrab: true
-
-        function setAndOpen(launching){
-            launchName.text = launching
-            launchIcon.source = contextIcon
-            launchPopup.forceOpen(appBarWidget)
-            launchPopupTimer.running = true
-        }
-
-        Timer{
-            id: launchPopupTimer
-            interval: 1500
-            onTriggered:{
-                launchPopup.forceClose()
-            }
-        }
-
-        content: RowLayout {
-            anchors.fill: parent
-            anchors.topMargin: 8
-            spacing: 2
-
-            Image {
-                id: launchIcon
-                source: ""
-                Layout.preferredWidth: 30
-                Layout.preferredHeight: 30
-                fillMode: Image.PreserveAspectFit
-            }
-
-            Text {
-                Layout.fillWidth: true
-                id: launchName
-                color: root.settings.theme.text
-                font.family: root.settings.fontFamily
-                font.weight: 500
-                font.pixelSize: 20
-            }
-        }
     }
 
     // -- CUSTOM ARG POPUP
-    PopupPanel{
+    AppBarArgPopup {
         id: argPopup
-        implicitHeight: 45
-        implicitWidth: appBarWidget.width
-        sidePadding: 0
-        fadingEffectMax: 1.0
-        requireFocusGrab: true
-
-        function acceptAndCall(execute){
-            if (execute) root.execute( root.combine(contextTarget.command.split(" "), inputField.text.split(" ")) )
-            argPopup.forceClose()
-            inputField.text = ""
+        onLaunched: {
             launchPopup.setAndOpen(
-                contextTarget.nickname 
-                    ? "Launching " + contextTarget.nickname 
-                    : "Launching " + contextTarget.name
+                contextTarget.nickname
+                    ? "Launching " + contextTarget.nickname
+                    : "Launching " + contextTarget.name,
+                contextIcon
             )
-        } 
-
-        content: RowLayout {
-            anchors.fill: parent
-            anchors.topMargin: 5
-            spacing: 10
-
-            Image {
-                id: image
-                source: contextIcon
-                Layout.preferredWidth: 30
-                Layout.preferredHeight: 30
-                fillMode: Image.PreserveAspectFit
-            }
-
-            TextField {
-                Layout.fillWidth: true
-                id: inputField
-                color: root.settings.theme.text
-                cursorDelegate: Rectangle{
-                    width: 2
-                    color : root.settings.theme.primary
-                }
-                font.family: root.settings.fontFamily
-                font.weight: 500
-                font.pixelSize: 15
-                background: Rectangle {
-                    color: root.settings.theme.surface
-                    border.width: 0
-                    radius: 15
-                }
-                onAccepted: argPopup.acceptAndCall(true)
-            }
-
-            IconButton{
-                iconName: "close"
-                iconSize: 35
-                tooltipText: "Close Args Popup"
-                color: root.settings.theme.text
-                onClicked: argPopup.acceptAndCall(false)
-            }
         }
     }
 
     // -- CONTEXT MENU
-    PopupPanel{
+    AppBarContextMenu {
         id: popup
-        implicitHeight: 350
-        implicitWidth: popupColumn.implicitWidth + 16
-        sidePadding: 0
-        fadingEffectMax: 1.0
-        property ListModel actions: ListModel{}
-
-        content: ColumnLayout {
-            id: popupColumn
-            anchors.fill: parent
-            spacing: 0
-            Repeater {
-                model: popup.actions
-                delegate: RoundButton {
-                    id: actionbtn
-                    required property var modelData
-                    Layout.fillWidth: true
-                    Layout.alignment: Qt.AlignLeft
-
-                    text: modelData.name
-                    font.family: root.settings.fontFamily
-                    font.weight: 700
-                    font.pixelSize: 14
-
-                    icon.source: modelData.icon ? root.iconSource(modelData.icon) : undefined
-                    icon.color: "transparent"
-
-                    padding: 5
-                    horizontalPadding: 10
-
-                    contentItem: RowLayout {
-                        spacing: 6
-                        Image {
-                            source: actionbtn.icon.source
-                            width: 16
-                            height: 16
-                            fillMode: Image.PreserveAspectFit
-                            visible: source != ""
-                        }
-                        Text {
-                            text: actionbtn.text
-                            color: root.settings.theme.text
-                            font: actionbtn.font
-                            horizontalAlignment: Text.AlignLeft
-                            elide: Text.ElideNone
-                            wrapMode: Text.NoWrap
-                            Layout.fillWidth: true
-                        }
-                    }
-
-                    HoverHandler {
-                        id:hoverHandler
-                        cursorShape: Qt.PointingHandCursor
-                    }
-
-                    background: Rectangle {
-                        radius: 6
-                        color: hoverHandler.hovered ? root.settings.theme.primary : "transparent"
-                    }
-
-                    onClicked: {
-                        if (modelData.action === "pin") {
-                            togglePin(contextTarget)
-                            root.saveSettings()
-                            apps.clear()
-                            addedStaticApps = false
-                        } else if (modelData.action === "debug:data") {
-                            var pids = getPIDs(contextTarget.name)
-                        } else if (modelData.action === "launch:with") {
-                            argPopup.forceOpen(appBarWidget)
-                        } else if (modelData.action === "launch:custom") {
-                            if (contextTarget.command) { 
-                                launch(contextTarget, true, modelData.index) 
-                                launchPopup.setAndOpen(
-                                    contextTarget.nickname 
-                                        ? "Launching " + contextTarget.nickname 
-                                        : "Launching " + contextTarget.name
-                                )
-                            }
-                        } else if (modelData.action === "launch:last") {
-                            if (contextTarget.command) { 
-                                launch(contextTarget, true, 0)
-                                launchPopup.setAndOpen(
-                                    contextTarget.nickname 
-                                        ? "Launching " + contextTarget.nickname 
-                                        : "Launching " + contextTarget.name
-                                )
-                            }
-                        } else if (modelData.action === "launch") {
-                            if (contextTarget.command) { 
-                                launch(contextTarget, false)
-                                launchPopup.setAndOpen(
-                                    contextTarget.nickname 
-                                        ? "Launching " + contextTarget.nickname 
-                                        : "Launching " + contextTarget.name
-                                )
-                            }
-                        } else if (modelData.action === "copy:command") {
-                            root.copy( contextTarget.command )
-                        } else if (modelData.action === "workspace:hide") {
-                            hideAll(contextTarget)
-                        } else if (modelData.action === "workspace:show") {
-                            showAll(contextTarget)
-                        } else if (modelData.action === "copy:args"){
-                            var opts = decodeOptions(contextTarget.options)
-                            var str = contextTarget.command
-                            for (var i=0; i < opts[0].length; i++){
-                                str += " " + opts[0][i]
-                            }
-                            root.copy( str )
-                        } else if (modelData.action === "open"){
-                            var args = contextTarget.command.split(" ")
-                            for (var i=0; i < args.length; i++){
-                                var arg = args[i]
-                                if (arg.startsWith("/")){
-                                    root.execute( ["nautilus", arg] )
-                                    break 
-                                }
-                            }
-                        } else if (modelData.action === "close") {
-                            closeApp(modelData.index, contextTarget.name)
-                        } else if (modelData.action === "kill"){
-                            var pids = getPIDs(contextTarget.name)
-                            for (var i = 0; i < pids.length; i++) {
-                                killApp(pids[i])
-                            }
-                        } else if (modelData.action === "toggleOptions"){
-                            toggleNoOptions(contextTarget.name)
-                        } else if (modelData.action === "workspace:send") {
-                            var pids = getPIDs(contextTarget.name)
-                            workspaceSendPopup.targetPid   = pids.length > 0 ? pids[0] : ""
-                            workspaceSendPopup.targetClass = contextTarget.name
-                            popup.forceClose()
-                            workspaceSendPopup.forceOpen(appBarWidget)
-                            return
-                        } else if (modelData.action === "masque:open") {
-                            popup.forceClose()
-                            masquePopup.forceOpen(appBarWidget)
-                            return
-                        } else if (modelData.action === "masque:manage") {
-                            popup.forceClose()
-                            masqueManagePopup.forceOpen(appBarWidget)
-                            return
-                        } else if (modelData.action === "masque:remove") {
-                            removeMasque(contextTarget.name)
-                        }
-
-                        popup.forceClose()
-                    }
+        onActionTriggered: function(modelData) {
+            if (modelData.action === "pin") {
+                togglePin(contextTarget)
+                root.saveSettings()
+                apps.clear()
+                addedStaticApps = false
+            } else if (modelData.action === "debug:data") {
+                var pids = getPIDs(contextTarget.name)
+            } else if (modelData.action === "launch:with") {
+                argPopup.contextTarget = contextTarget
+                argPopup.contextIcon   = contextIcon
+                argPopup.forceOpen(appBarWidget)
+            } else if (modelData.action === "launch:custom") {
+                if (contextTarget.command) {
+                    launch(contextTarget, true, modelData.index)
+                    launchPopup.setAndOpen(
+                        contextTarget.nickname ? "Launching " + contextTarget.nickname : "Launching " + contextTarget.name,
+                        contextIcon
+                    )
                 }
+            } else if (modelData.action === "launch:last") {
+                if (contextTarget.command) {
+                    launch(contextTarget, true, 0)
+                    launchPopup.setAndOpen(
+                        contextTarget.nickname ? "Launching " + contextTarget.nickname : "Launching " + contextTarget.name,
+                        contextIcon
+                    )
+                }
+            } else if (modelData.action === "launch") {
+                if (contextTarget.command) {
+                    launch(contextTarget, false)
+                    launchPopup.setAndOpen(
+                        contextTarget.nickname ? "Launching " + contextTarget.nickname : "Launching " + contextTarget.name,
+                        contextIcon
+                    )
+                }
+            } else if (modelData.action === "copy:command") {
+                root.copy(contextTarget.command)
+            } else if (modelData.action === "workspace:hide") {
+                hideAll(contextTarget)
+            } else if (modelData.action === "workspace:show") {
+                showAll(contextTarget)
+            } else if (modelData.action === "copy:args") {
+                var opts = decodeOptions(contextTarget.options)
+                var str = contextTarget.command
+                for (var i = 0; i < opts[0].length; i++) str += " " + opts[0][i]
+                root.copy(str)
+            } else if (modelData.action === "open") {
+                var args = contextTarget.command.split(" ")
+                for (var i = 0; i < args.length; i++) {
+                    if (args[i].startsWith("/")) { root.execute(["nautilus", args[i]]); break }
+                }
+            } else if (modelData.action === "close") {
+                closeApp(modelData.index, contextTarget.name)
+            } else if (modelData.action === "kill") {
+                var pids = getPIDs(contextTarget.name)
+                for (var i = 0; i < pids.length; i++) killApp(pids[i])
+            } else if (modelData.action === "toggleOptions") {
+                toggleNoOptions(contextTarget.name)
+            } else if (modelData.action === "workspace:send") {
+                var pids = getPIDs(contextTarget.name)
+                workspaceSendPopup.targetPid   = pids.length > 0 ? pids[0] : ""
+                workspaceSendPopup.targetClass = contextTarget.name
+                workspaceSendPopup.forceOpen(appBarWidget)
+            } else if (modelData.action === "masque:open") {
+                masquePopup.contextTarget = contextTarget
+                masquePopup.forceOpen(appBarWidget)
+            } else if (modelData.action === "masque:manage") {
+                masqueManagePopup.masques = getMasquesUnder(contextTarget.name)
+                masqueManagePopup.forceOpen(appBarWidget)
+            } else if (modelData.action === "masque:remove") {
+                removeMasque(contextTarget.name)
             }
         }
     }
@@ -1117,265 +944,44 @@ RoundedBlock{
         }
     }
 
-    // -- ADD BUTTON DROPDOWN
-    PopupPanel {
-        id: addDropdown
-        implicitHeight: 80
-        implicitWidth: Math.max(addDropdownColumn.implicitWidth + 32, 220)
-        sidePadding: 0
-        fadingEffectMax: 1.0
-        scrollingEffect: false
-
-        content: ColumnLayout {
-            id: addDropdownColumn
-            anchors.fill: parent
-            spacing: 0
-
-            RoundButton {
-                Layout.fillWidth: true
-                text: "From Installed Apps"
-                font.family: root.settings.fontFamily
-                font.pixelSize: 13
-                font.weight: 600
-                padding: 6
-                horizontalPadding: 16
-                contentItem: RowLayout {
-                    spacing: 6
-                    Image {
-                        source: root.iconSource("search")
-                        width: 14; height: 14
-                        fillMode: Image.PreserveAspectFit
-                    }
-                    Text {
-                        text: parent.parent.text
-                        font: parent.parent.font
-                        color: root.settings.theme.text
-                    }
-                }
-                background: Rectangle {
-                    radius: 6
-                    color: addHov1.hovered ? root.settings.theme.primary : "transparent"
-                    opacity: addHov1.hovered ? 0.18 : 1
-                }
-                HoverHandler { id: addHov1; cursorShape: Qt.PointingHandCursor }
-                onClicked: {
-                    addDropdown.forceClose()
-                    addAppWindow.openExisting()
-                }
-            }
-
-            RoundButton {
-                Layout.fillWidth: true
-                text: "Custom App"
-                font.family: root.settings.fontFamily
-                font.pixelSize: 13
-                font.weight: 600
-                padding: 6
-                horizontalPadding: 16
-                contentItem: RowLayout {
-                    spacing: 6
-                    Image {
-                        source: root.iconSource("settings")
-                        width: 14; height: 14
-                        fillMode: Image.PreserveAspectFit
-                    }
-                    Text {
-                        text: parent.parent.text
-                        font: parent.parent.font
-                        color: root.settings.theme.text
-                    }
-                }
-                background: Rectangle {
-                    radius: 6
-                    color: addHov2.hovered ? root.settings.theme.primary : "transparent"
-                    opacity: addHov2.hovered ? 0.18 : 1
-                }
-                HoverHandler { id: addHov2; cursorShape: Qt.PointingHandCursor }
-                onClicked: {
-                    addDropdown.forceClose()
-                    addAppWindow.openCustom()
-                }
-            }
+    // -- RUN COMMAND POPUP
+    AppBarRunPopup {
+        id: runPopup
+        onLaunched: function(cmd) {
+            launchPopup.setAndOpen("Running: " + cmd, root.iconSource("terminal"))
         }
+    }
+
+    // -- COMMAND HISTORY POPUP
+    AppBarHistoryPopup {
+        id: historyPopup
+        onCommandSelected: function(cmd) {
+            root.execute(cmd.split(/\s+/))
+            launchPopup.setAndOpen("Running: " + cmd, root.iconSource("terminal"))
+        }
+    }
+
+    // -- ADD BUTTON DROPDOWN
+    AppBarAddDropdown {
+        id: addDropdown
+        appWindow: addAppWindow
+        onRunRequested:     runPopup.forceOpen(addAppButton)
+        onHistoryRequested: historyPopup.forceOpen(addAppButton)
     }
 
     // -- MASQUE SELECTOR POPUP
-    PopupPanel {
+    AppBarMasquePopup {
         id: masquePopup
-        implicitHeight: masqueColumn.implicitHeight + 16
-        implicitWidth: Math.max(masqueColumn.implicitWidth + 32, 240)
-        sidePadding: 0
-        fadingEffectMax: 1.0
-        scrollingEffect: false
-
-        content: ColumnLayout {
-            id: masqueColumn
-            anchors.fill: parent
-            spacing: 0
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 6
-                Layout.topMargin: 6
-                Layout.bottomMargin: 2
-
-                Text {
-                    text: "Add Under ..."
-                    color: root.settings.theme.text
-                    opacity: 0.55
-                    font.family: root.settings.fontFamily
-                    font.pixelSize: 12
-                    font.weight: 600
-                    Layout.fillWidth: true
-                }
-
-                IconButton {
-                    iconName: "close"
-                    iconSize: 14
-                    color: root.settings.theme.text
-                    tooltipText: "Cancel"
-                    onClicked: masquePopup.forceClose()
-                }
-            }
-
-            Repeater {
-                model: appBarWidget.getPinnedApps()
-                delegate: RoundButton {
-                    required property var modelData
-                    visible: modelData.name !== appBarWidget.contextTarget.name
-                    Layout.fillWidth: true
-                    padding: 6
-                    horizontalPadding: 16
-
-                    contentItem: RowLayout {
-                        spacing: 8
-                        Image {
-                            source: modelData.icon && modelData.icon !== "*"
-                                ? modelData.icon
-                                : root.iconSource("open_app")
-                            width: 20
-                            height: 20
-                            sourceSize.width: 20
-                            sourceSize.height: 20
-                            fillMode: Image.PreserveAspectFit
-                            smooth: true
-                        }
-                        Text {
-                            text: modelData.nickname !== modelData.name
-                                ? modelData.nickname + "  (" + modelData.name + ")"
-                                : modelData.name
-                            font.family: root.settings.fontFamily
-                            font.pixelSize: 13
-                            font.weight: 500
-                            color: root.settings.theme.text
-                            Layout.fillWidth: true
-                        }
-                    }
-
-                    background: Rectangle {
-                        radius: 6
-                        color: masqueHov.hovered ? root.settings.theme.primary : "transparent"
-                        opacity: masqueHov.hovered ? 0.18 : 1
-                    }
-                    HoverHandler { id: masqueHov; cursorShape: Qt.PointingHandCursor }
-                    onClicked: {
-                        setMasque(appBarWidget.contextTarget.name, modelData.name)
-                        masquePopup.forceClose()
-                    }
-                }
-            }
+        onMasqueSelected: function(targetClass, masqueUnderName) {
+            setMasque(targetClass, masqueUnderName)
         }
     }
 
-    // -- MASQUE MANAGE POPUP (remove masques from a pinned app)
-    PopupPanel {
+    // -- MASQUE MANAGE POPUP
+    AppBarMasqueManagePopup {
         id: masqueManagePopup
-        implicitHeight: masqueManageColumn.implicitHeight + 16
-        implicitWidth: Math.max(masqueManageColumn.implicitWidth + 32, 240)
-        sidePadding: 0
-        fadingEffectMax: 1.0
-        scrollingEffect: false
-
-        content: ColumnLayout {
-            id: masqueManageColumn
-            anchors.fill: parent
-            spacing: 0
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.leftMargin: 10
-                Layout.rightMargin: 6
-                Layout.topMargin: 6
-                Layout.bottomMargin: 2
-
-                Text {
-                    text: "Remove masque:"
-                    color: root.settings.theme.text
-                    opacity: 0.55
-                    font.family: root.settings.fontFamily
-                    font.pixelSize: 12
-                    font.weight: 600
-                    Layout.fillWidth: true
-                }
-
-                IconButton {
-                    iconName: "close"
-                    iconSize: 14
-                    color: root.settings.theme.text
-                    tooltipText: "Cancel"
-                    onClicked: masqueManagePopup.forceClose()
-                }
-            }
-
-            Repeater {
-                model: appBarWidget.contextTarget
-                    ? appBarWidget.getMasquesUnder(appBarWidget.contextTarget.name)
-                    : []
-                delegate: RoundButton {
-                    required property var modelData
-                    Layout.fillWidth: true
-                    padding: 6
-                    horizontalPadding: 16
-
-                    contentItem: RowLayout {
-                        spacing: 8
-                        Image {
-                            source: root.iconSource("masked")
-                            width: 18; height: 18
-                            sourceSize.width: 18; sourceSize.height: 18
-                            fillMode: Image.PreserveAspectFit
-                            opacity: 0.7
-                        }
-                        Text {
-                            text: modelData.className
-                            font.family: root.settings.fontFamily
-                            font.pixelSize: 13
-                            font.weight: 500
-                            color: root.settings.theme.text
-                            Layout.fillWidth: true
-                        }
-                        Image {
-                            source: root.iconSource("close")
-                            width: 14; height: 14
-                            sourceSize.width: 14; sourceSize.height: 14
-                            fillMode: Image.PreserveAspectFit
-                            opacity: 0.6
-                        }
-                    }
-
-                    background: Rectangle {
-                        radius: 6
-                        color: manageHov.hovered ? "#e05555" : "transparent"
-                        opacity: manageHov.hovered ? 0.18 : 1
-                    }
-                    HoverHandler { id: manageHov; cursorShape: Qt.PointingHandCursor }
-                    onClicked: {
-                        removeMasque(modelData.className)
-                        masqueManagePopup.forceClose()
-                    }
-                }
-            }
+        onRemoveMasqueRequested: function(className) {
+            removeMasque(className)
         }
     }
 
@@ -1437,11 +1043,10 @@ RoundedBlock{
                         if (mouse.button == Qt.LeftButton){
                             if (!type.includes("active")){
                                 appBarWidget.contextIcon = content.getImageIcon()
-                                launch(model) 
+                                launch(model)
                                 launchPopup.setAndOpen(
-                                    nickname 
-                                        ? "Launching " + nickname 
-                                        : "Launching " + name
+                                    nickname ? "Launching " + nickname : "Launching " + name,
+                                    content.getImageIcon()
                                 )
                             } 
                         } else if (mouse.button == Qt.RightButton){
@@ -1527,11 +1132,12 @@ RoundedBlock{
         }
 
         // ── Add App button — always at the end ───────────────────
-        IconButton{
+        IconButton {
             id: addAppButton
-            iconName: "add"
-            iconSize: 16
-
+            iconName: "apps"
+            iconSize: 26
+            tooltipText: "Add App"
+            color: root.settings.theme.text
             onClicked: addDropdown.toggle(addAppButton)
         }
     }

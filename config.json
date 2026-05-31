@@ -21,11 +21,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#070e1b",
-        "surface": "#212129",
-        "primary": "#6d5e55",
-        "secondary": "#534846",
-        "text": "#ffd3a6"
+        "background": "#210308",
+        "surface": "#36181e",
+        "primary": "#855258",
+        "secondary": "#6a3e43",
+        "text": "#ffc4ca"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -71,6 +71,13 @@
             "icon": "/usr/share/icons/Papirus/64x64/apps/com.mitchellh.ghostty.svg",
             "command": "ghostty",
             "options": [
+                [
+                    "-e",
+                    "bash",
+                    "-c",
+                    "nautilus",
+                    "."
+                ],
                 [
                     "-e",
                     "tail",
@@ -147,6 +154,9 @@
             "command": "nautilus",
             "options": [
                 [
+                    "."
+                ],
+                [
                     "/home/fach/.local/share/icons/material/"
                 ],
                 [
@@ -184,13 +194,6 @@
             "masque": {
                 "classIncludes": "Godot"
             }
-        },
-        {
-            "name": "discord",
-            "nickname": "",
-            "icon": "/usr/share/icons/Papirus/64x64/apps/discord.svg",
-            "command": "/app/discord/Discord",
-            "options": []
         }
     ],
     "colorHistory": [

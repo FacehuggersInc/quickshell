@@ -241,7 +241,7 @@ ShellRoot {
 
     // -- THEME
     Timer{
-        id: themeCheckTimer
+        id: themeCheckTimer 
         interval: 100
         running: false
         repeat: true

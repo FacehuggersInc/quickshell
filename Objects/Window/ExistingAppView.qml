@@ -40,9 +40,14 @@ Item {
                         comment:   parts.length > 4 ? parts[4] : ""
                     })
                 }
-                existingView.allApps     = apps
+                // Filter out already pinned apps
+                var pinned = root.settings.launchers.map(function(l) { return l.name })
+                apps = apps.filter(function(a) {
+                    return !pinned.includes(a.className)
+                })
+                existingView.allApps      = apps
                 existingView.filteredApps = apps
-                existingView.loading     = false
+                existingView.loading      = false
             }
         }
     }

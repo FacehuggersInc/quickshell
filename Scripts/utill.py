@@ -408,12 +408,18 @@ class Utill():
         search_paths = [
             "/usr/share/applications/*.desktop",
             "/usr/local/share/applications/*.desktop",
+            "/var/lib/flatpak/exports/share/applications/*.desktop",
             os.path.expanduser("~/.local/share/applications/*.desktop"),
+            os.path.expanduser("~/.local/share/flatpak/exports/share/applications/*.desktop"),
         ]
         results, seen = [], set()
 
         for pattern in search_paths:
-            for path in sorted(glob.glob(pattern)):
+            # follow_symlinks via glob — Flatpak desktop files are symlinks
+            for path in sorted(glob.glob(pattern, recursive=False)):
+                # Resolve symlink so we read the actual file
+                path = os.path.realpath(path)
+                if not os.path.isfile(path): continue
                 try:
                     with open(path, "r", encoding="utf-8", errors="ignore") as f:
                         raw = f.read()
@@ -421,19 +427,44 @@ class Utill():
                     config.read_string(raw)
                     if not config.has_section("Desktop Entry"): continue
                     entry = config["Desktop Entry"]
+
+                    # Only skip truly hidden/nodisplay apps
                     if entry.get("NoDisplay", "false").lower() == "true": continue
                     if entry.get("Hidden",    "false").lower() == "true": continue
-                    if entry.get("Terminal",  "false").lower() == "true": continue
+                    # Keep Terminal apps — user may want to pin them
+                    # (they just open in a terminal window)
+
+                    # Must have a name and exec
                     name = entry.get("Name", "").strip()
-                    if not name or name in seen: continue
+                    if not name: continue
+
+                    # Deduplicate by name
+                    if name in seen: continue
                     seen.add(name)
+
                     exec_raw   = entry.get("Exec", "").strip()
-                    exec_clean = re.sub(r'%[fFuUdDnNickvm]', '', exec_raw).strip()
+                    if not exec_raw: continue
+
+                    # Strip field codes and env prefixes
+                    exec_clean = re.sub(r'\s*%[fFuUdDnNickvmBb]\s*', ' ', exec_raw).strip()
                     exec_clean = re.sub(r'^env\s+\S+=\S+\s+', '', exec_clean).strip()
-                    icon       = entry.get("Icon",       "").strip()
-                    comment    = entry.get("Comment",    "").strip().replace("|", "-").replace("\n", " ")
-                    binary     = exec_clean.split()[0] if exec_clean.split() else ""
-                    class_name = os.path.basename(binary).lower() if binary else name.lower()
+
+                    icon    = entry.get("Icon",    "").strip()
+                    comment = entry.get("Comment", "").strip().replace("|", "-").replace("\n", " ")
+
+                    # Try StartupWMClass first — most reliable for window matching
+                    class_name = entry.get("StartupWMClass", "").strip()
+                    if not class_name:
+                        # For Flatpak: Exec starts with "flatpak run com.app.Name"
+                        # Use the app ID as class name since that's what Hyprland sees
+                        exec_parts = exec_clean.split()
+                        if len(exec_parts) >= 3 and exec_parts[0] == "flatpak" and exec_parts[1] == "run":
+                            class_name = exec_parts[2]  # e.g. com.discordapp.Discord
+                        else:
+                            binary     = exec_parts[0] if exec_parts else ""
+                            class_name = os.path.basename(binary) if binary else name
+                            class_name = re.sub(r"^.*/", "", class_name)
+
                     results.append(f"{name}|{exec_clean}|{icon}|{class_name}|{comment}")
                 except Exception:
                     continue
@@ -648,6 +679,94 @@ class Utill():
     @argfunc
     def generatetheme(self, *args):
         return build_theme(args[1:], args[0])
+    # ── COMMAND HISTORY ──────────────────────────────────────────────────────
+
+    @argfunc
+    def getcommandhistory(self, *args):
+        """Read shell command history, filter out system/package/sudo commands.
+        Checks bash, zsh, and fish history files.
+        Returns newline-separated unique commands, most recent first.
+        """
+        # Commands to filter out — system, package management, sudo, etc.
+        FILTER_PREFIXES = (
+            "sudo", "pacman", "yay", "paru", "apt", "dnf", "brew",
+            "systemctl", "journalctl", "service", "chown", "chmod",
+            "rm ", "rmdir", "mv ", "cp ", "ln ", "mount", "umount",
+            "dd ", "mkfs", "fdisk", "parted",
+            "git ", "pip ", "npm ", "cargo", "make", "cmake",
+            "ssh", "scp", "rsync",
+            "cat ", "less", "more", "tail", "head", "grep", "awk", "sed",
+            "ls", "cd ", "pwd", "echo", "export", "source", ".",
+            "kill", "pkill", "killall",
+            "man ", "help", "which", "whereis",
+            "#",  # comments
+        )
+
+        # History file locations
+        history_files = [
+            Path(os.path.expanduser("~/.bash_history")),
+            Path(os.path.expanduser("~/.zsh_history")),
+            Path(os.path.expanduser("~/.local/share/fish/fish_history")),
+        ]
+
+        commands = []
+        seen = set()
+
+        for hfile in history_files:
+            if not hfile.exists():
+                continue
+            try:
+                with open(hfile, "r", encoding="utf-8", errors="ignore") as f:
+                    lines = f.readlines()
+
+                # Fish history format: "- cmd: command" / "  when: timestamp"
+                is_fish = "fish" in str(hfile)
+
+                for line in reversed(lines):
+                    line = line.strip()
+                    if not line:
+                        continue
+
+                    if is_fish:
+                        if line.startswith("- cmd:"):
+                            cmd = line[6:].strip()
+                        else:
+                            continue
+                    else:
+                        # zsh history has timestamps: ": 1234567890:0;command"
+                        if line.startswith(":") and ";" in line:
+                            cmd = line.split(";", 1)[-1].strip()
+                        else:
+                            cmd = line
+
+                    if not cmd or len(cmd) < 3:
+                        continue
+
+                    # Filter out system commands
+                    skip = False
+                    for prefix in FILTER_PREFIXES:
+                        if cmd.lower().startswith(prefix.lower()):
+                            skip = True
+                            break
+
+                    # Also skip commands that are just a single word (bare builtins)
+                    if not skip and " " not in cmd and "/" not in cmd:
+                        skip = True
+
+                    if skip or cmd in seen:
+                        continue
+
+                    seen.add(cmd)
+                    commands.append(cmd)
+
+                    if len(commands) >= 100:
+                        break
+
+            except Exception:
+                continue
+
+        return "\n".join(commands) if commands else "none"
+
 
     # ── COLOR HISTORY ────────────────────────────────────────────────────────
 

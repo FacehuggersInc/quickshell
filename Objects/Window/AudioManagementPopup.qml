@@ -6,9 +6,9 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Window
 import Quickshell.Hyprland
+import Qt5Compat.GraphicalEffects
 
 import qs.Objects.Design
-import Qt5Compat.GraphicalEffects
 import qs.Objects.Window
 import qs.Objects.Widgets
 import qs.Objects.Widgets.Internal
@@ -21,7 +21,7 @@ PopupWindow {
     anchor.rect.y: mainWindow.height + 5
 
     property int panelWidth: 500
-    property int panelHeight: 420
+    property int panelHeight: Math.min(Screen.height - mainWindow.height - 20, 480)
 
     implicitWidth: panelWidth
     implicitHeight: panelHeight
@@ -30,7 +30,7 @@ PopupWindow {
 
     mask: Region { item: background }
 
-    // Catch clicks outside the panel and close
+    // Click outside to close
     MouseArea {
         anchors.fill: parent
         z: -1
@@ -177,7 +177,7 @@ PopupWindow {
         }
     }
 
-    // ── Background block ──────────────────────────────────────────
+    // ── Background ────────────────────────────────────────────────
     Rectangle {
         id: background
         width: panelWidth
@@ -187,10 +187,10 @@ PopupWindow {
         opacity: 0
         clip: true
 
-        // Eat mouse events so clicks inside don't dismiss the popup
+        // Eat clicks inside so they don't fall through to dismiss
         MouseArea {
             anchors.fill: parent
-            onClicked: {}  // consume without closing
+            onClicked: {}
         }
 
         layer.enabled: true
@@ -204,171 +204,184 @@ PopupWindow {
             source: background
         }
 
-        ColumnLayout {
+        // ── Scrollable content ────────────────────────────────────
+        ScrollView {
             anchors.fill: parent
             anchors.margins: 12
-            spacing: 10
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            ScrollBar.vertical.policy: ScrollBar.AsNeeded
+            contentWidth: panelWidth - 24
+            contentHeight: audioColumn.implicitHeight
+            clip: true
 
-            // ── MEDIA ─────────────────────────────────────────────
-            TextDivider {
-                id: mediaHeader
-                dividerText: "Media"
-                dividerHeight: 3
-                Layout.fillWidth: true
-            }
-
-            CurrentlyPlayingInternal {
-                id: currentlyPlaying
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignCenter
-                textColor: root.settings.theme.text
-                textWordWrap: true
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignCenter
-                spacing: 6
-
-                IconButton {
-                    iconName: "music_prev"
-                    iconSize: 50
-                    tooltipText: "Previous"
-                    color: root.settings.theme.primary
-                    radius: 8
-                    borderColor: root.settings.theme.primary
-                    borderWidth: 2
-                    Layout.preferredWidth: 95
-                    Layout.preferredHeight: 40
-                    onClicked: prevCommand.running = true
-                    Process { id: prevCommand; command: ["playerctl", "previous"] }
-                }
-                IconButton {
-                    id: playPauseButton
-                    iconName: "music_pause"
-                    iconSize: 50
-                    tooltipText: "Play/Pause"
-                    color: root.settings.theme.primary
-                    radius: 8
-                    borderColor: root.settings.theme.primary
-                    borderWidth: 2
-                    Layout.preferredWidth: 95
-                    Layout.preferredHeight: 40
-                    onClicked: toggleCommand.running = true
-                    Process { id: toggleCommand; command: ["playerctl", "play-pause"] }
-                }
-                IconButton {
-                    iconName: "music_skip"
-                    iconSize: 50
-                    tooltipText: "Skip"
-                    color: root.settings.theme.primary
-                    radius: 8
-                    borderColor: root.settings.theme.primary
-                    borderWidth: 2
-                    Layout.preferredWidth: 95
-                    Layout.preferredHeight: 40
-                    onClicked: nextCommand.running = true
-                    Process { id: nextCommand; command: ["playerctl", "next"] }
-                }
-            }
-
-            // ── VOLUME CONTROL ────────────────────────────────────
-            TextDivider {
-                dividerText: "Volume Control"
-                dividerHeight: 3
-                Layout.fillWidth: true
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 6
-                IconButton {
-                    id: volumeSliderIcon
-                    iconName: "volume_min"
-                    iconSize: 45
-                    tooltipText: ""
-                }
-                CustomSlider {
-                    id: volumeSlider
-                    Layout.fillWidth: true
-                    from: 0
-                    to: 100
-                    handleBorderWidth: 0
-                    onMoved: setVolume(outputDevices.selectedId, this.value)
-                }
-                Text {
-                    id: volumeSliderText
-                    text: "0%"
-                    color: root.settings.theme.text
-                    font.family: root.settings.fontFamily
-                    font.weight: 500
-                    font.pixelSize: 16
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 6
-                IconButton {
-                    id: micSliderIcon
-                    iconName: "microphone_alert"
-                    iconSize: 45
-                    tooltipText: ""
-                    onClicked: volumeWidget.toggleMicMute()
-                }
-                CustomSlider {
-                    id: micSlider
-                    Layout.fillWidth: true
-                    from: 0
-                    to: 100
-                    handleBorderWidth: 0
-                    onMoved: setVolume(inputDevices.selectedId, this.value)
-                }
-                Text {
-                    id: micSliderText
-                    text: "0%"
-                    color: root.settings.theme.text
-                    font.family: root.settings.fontFamily
-                    font.weight: 500
-                    font.pixelSize: 16
-                }
-            }
-
-            // ── AUDIO DEVICES ─────────────────────────────────────
-            TextDivider {
-                dividerText: "Audio Devices"
-                dividerHeight: 3
-                Layout.fillWidth: true
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
+            ColumnLayout {
+                id: audioColumn
+                width: panelWidth - 24
                 spacing: 10
-                IconButton {
-                    iconName: "media_output"
-                    iconSize: 45
-                    tooltipText: "Output Device"
-                    color: root.settings.theme.primary
-                }
-                DeviceComboBox {
-                    id: outputDevices
-                    Layout.fillWidth: true
-                }
-            }
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-                IconButton {
-                    iconName: "media_input"
-                    iconSize: 45
-                    tooltipText: "Input Device"
-                    color: root.settings.theme.primary
-                }
-                DeviceComboBox {
-                    id: inputDevices
+                // ── MEDIA ─────────────────────────────────────────
+                TextDivider {
+                    id: mediaHeader
+                    dividerText: "Media"
+                    dividerHeight: 3
                     Layout.fillWidth: true
                 }
+
+                CurrentlyPlayingInternal {
+                    id: currentlyPlaying
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignCenter
+                    textColor: root.settings.theme.text
+                    textWordWrap: true
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignCenter
+                    spacing: 6
+
+                    IconButton {
+                        iconName: "music_prev"
+                        iconSize: 50
+                        tooltipText: "Previous"
+                        color: root.settings.theme.primary
+                        radius: 8
+                        borderColor: root.settings.theme.primary
+                        borderWidth: 2
+                        Layout.preferredWidth: 95
+                        Layout.preferredHeight: 40
+                        onClicked: prevCommand.running = true
+                        Process { id: prevCommand; command: ["playerctl", "previous"] }
+                    }
+                    IconButton {
+                        id: playPauseButton
+                        iconName: "music_pause"
+                        iconSize: 50
+                        tooltipText: "Play/Pause"
+                        color: root.settings.theme.primary
+                        radius: 8
+                        borderColor: root.settings.theme.primary
+                        borderWidth: 2
+                        Layout.preferredWidth: 95
+                        Layout.preferredHeight: 40
+                        onClicked: toggleCommand.running = true
+                        Process { id: toggleCommand; command: ["playerctl", "play-pause"] }
+                    }
+                    IconButton {
+                        iconName: "music_skip"
+                        iconSize: 50
+                        tooltipText: "Skip"
+                        color: root.settings.theme.primary
+                        radius: 8
+                        borderColor: root.settings.theme.primary
+                        borderWidth: 2
+                        Layout.preferredWidth: 95
+                        Layout.preferredHeight: 40
+                        onClicked: nextCommand.running = true
+                        Process { id: nextCommand; command: ["playerctl", "next"] }
+                    }
+                }
+
+                // ── VOLUME CONTROL ────────────────────────────────
+                TextDivider {
+                    dividerText: "Volume Control"
+                    dividerHeight: 3
+                    Layout.fillWidth: true
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    IconButton {
+                        id: volumeSliderIcon
+                        iconName: "volume_min"
+                        iconSize: 45
+                        tooltipText: ""
+                    }
+                    CustomSlider {
+                        id: volumeSlider
+                        Layout.fillWidth: true
+                        from: 0
+                        to: 100
+                        handleBorderWidth: 0
+                        onMoved: setVolume(outputDevices.selectedId, this.value)
+                    }
+                    Text {
+                        id: volumeSliderText
+                        text: "0%"
+                        color: root.settings.theme.text
+                        font.family: root.settings.fontFamily
+                        font.weight: 500
+                        font.pixelSize: 16
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    IconButton {
+                        id: micSliderIcon
+                        iconName: "microphone_alert"
+                        iconSize: 45
+                        tooltipText: ""
+                        onClicked: volumeWidget.toggleMicMute()
+                    }
+                    CustomSlider {
+                        id: micSlider
+                        Layout.fillWidth: true
+                        from: 0
+                        to: 100
+                        handleBorderWidth: 0
+                        onMoved: setVolume(inputDevices.selectedId, this.value)
+                    }
+                    Text {
+                        id: micSliderText
+                        text: "0%"
+                        color: root.settings.theme.text
+                        font.family: root.settings.fontFamily
+                        font.weight: 500
+                        font.pixelSize: 16
+                    }
+                }
+
+                // ── AUDIO DEVICES ─────────────────────────────────
+                TextDivider {
+                    dividerText: "Audio Devices"
+                    dividerHeight: 3
+                    Layout.fillWidth: true
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    IconButton {
+                        iconName: "media_output"
+                        iconSize: 45
+                        tooltipText: "Output Device"
+                        color: root.settings.theme.primary
+                    }
+                    DeviceComboBox {
+                        id: outputDevices
+                        Layout.fillWidth: true
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    IconButton {
+                        iconName: "media_input"
+                        iconSize: 45
+                        tooltipText: "Input Device"
+                        color: root.settings.theme.primary
+                    }
+                    DeviceComboBox {
+                        id: inputDevices
+                        Layout.fillWidth: true
+                    }
+                }
+
+                Item { implicitHeight: 4 }
             }
         }
     }
