@@ -1136,7 +1136,7 @@ RoundedBlock{
             id: addAppButton
             iconName: "apps"
             iconSize: 26
-            tooltipText: "Add App"
+            tooltipText: "App Menu"
             color: root.settings.theme.text
             onClicked: addDropdown.toggle(addAppButton)
         }

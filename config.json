@@ -21,11 +21,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#210308",
-        "surface": "#36181e",
-        "primary": "#855258",
-        "secondary": "#6a3e43",
-        "text": "#ffc4ca"
+        "background": "#170b01",
+        "surface": "#282017",
+        "primary": "#68604a",
+        "secondary": "#524a39",
+        "text": "#e1deae"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -75,20 +75,18 @@
                     "-e",
                     "bash",
                     "-c",
+                    "r2modman"
+                ],
+                [
+                    "-e",
+                    "bash",
+                    "-c",
                     "nautilus",
                     "."
                 ],
                 [
                     "-e",
                     "tail",
-                    "-f"
-                ],
-                [
-                    "-e",
-                    "journalctl",
-                    "--user",
-                    "-u",
-                    "quickshell",
                     "-f"
                 ]
             ]

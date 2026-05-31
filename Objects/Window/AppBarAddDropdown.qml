@@ -56,7 +56,7 @@ PopupPanel {
         spacing: 0
 
         DropdownButton {
-            text: "From Installed Apps"
+            text: "Add Pinned App\nFrom Installed Apps"
             iconName: "search"
             onClicked: {
                 addDropdown.forceClose()
@@ -83,7 +83,7 @@ PopupPanel {
         }
 
         DropdownButton {
-            text: "Custom App"
+            text: "Add Custom Pinned App"
             iconName: "settings"
             onClicked: {
                 addDropdown.forceClose()
