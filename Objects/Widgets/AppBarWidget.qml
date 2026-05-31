@@ -528,14 +528,14 @@ RoundedBlock{
         if (currentMasque !== "") {
             // This app is masquing under another — offer to remove
             items.push({
-                "name": "Remove Masque (" + currentMasque + ")",
+                "name": "Remove Masque From (" + currentMasque + ")", 
                 "action": "masque:remove",
                 "icon": "masked"
             })
         } else {
             // Not masquing — offer to set one
             items.push({
-                "name": "Add as Masque...",
+                "name": "Masque under Another ...",
                 "action": "masque:open",
                 "icon": "masked_add"
             })
@@ -664,12 +664,16 @@ RoundedBlock{
         }
     }
 
+    function appHasLockOptionsFlag(name){
+        return root.settings.launcherflags.lockOptions.includes(name)
+    }
+
     function appHasNoOptionsFlag(name){
         return root.settings.launcherflags.ignoreOptions.includes(name)
     }
 
     function toggleNoOptions(name){
-        if (root.settings.launcherflags.lockOptions.includes(name)) return
+        if (appHasLockOptionsFlag(name)) return
         if (appHasNoOptionsFlag(name)) {
             for (var j = 0; j < root.settings.launcherflags.ignoreOptions.length; j++){
                 if (name === root.settings.launcherflags.ignoreOptions[j]){
