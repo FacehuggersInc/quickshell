@@ -163,29 +163,11 @@ Item {
         }
 
         // Add workspace button
-        RoundButton {
+        IconButton{
             id: addWsBtn
-            implicitWidth: 18
-            implicitHeight: 18
-            padding: 0
+            iconName: "add"
+            iconSize: 16
 
-            contentItem: Text {
-                text: "+"
-                color: root.settings.theme.text
-                font.pixelSize: 14
-                font.weight: 300
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                opacity: addHov.hovered ? 1.0 : 0.5
-            }
-            background: Rectangle {
-                radius: width / 2
-                color: "transparent"
-                border.color: root.settings.theme.text
-                border.width: 1
-                opacity: addHov.hovered ? 0.6 : 0.25
-            }
-            HoverHandler { id: addHov; cursorShape: Qt.PointingHandCursor }
             onClicked: workspaceSwitcher.createWorkspace()
         }
     }

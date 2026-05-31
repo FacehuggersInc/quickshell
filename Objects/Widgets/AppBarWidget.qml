@@ -1509,34 +1509,10 @@ RoundedBlock{
         }
 
         // ── Add App button — always at the end ───────────────────
-        RoundButton {
+        IconButton{
             id: addAppButton
-            padding: 1
-            Layout.preferredWidth: 32
-            Layout.preferredHeight: 32
-            font.family: root.settings.fontFamily
-
-            background: Rectangle {
-                radius: addAppButton.radius
-                color: addHovMain.hovered
-                    ? root.settings.theme.primary
-                    : "transparent"
-                opacity: addHovMain.hovered ? 0.25 : 0.4
-                border.color: root.settings.theme.text
-                border.width: 1
-            }
-
-            contentItem: Text {
-                text: "+"
-                color: root.settings.theme.text
-                font.family: root.settings.fontFamily
-                font.pixelSize: 20
-                font.weight: 300
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            HoverHandler { id: addHovMain; cursorShape: Qt.PointingHandCursor }
+            iconName: "add"
+            iconSize: 16
 
             onClicked: addDropdown.toggle(addAppButton)
         }
