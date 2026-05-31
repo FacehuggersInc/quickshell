@@ -18,9 +18,9 @@ RowLayout{
         if (num >= 60){
             return ['#ff4a4a', "volume_max", num]
         } else if (num >= 50) {
-            return ['#ff8e8e', "volume_max", num]
+            return [root.settings.theme.primary, "volume_max", num]
         } else if (num >= 20) {
-            return ['#ffc8c8', "volume_med", num]
+            return [root.settings.theme.primary, "volume_med", num]
         } else {
             return ['#fffcfc', "volume_min", num]
         }
@@ -33,10 +33,23 @@ RowLayout{
 
     Process {
         id: micToggleProc
-        command: ["python3", "/home/fach/.config/quickshell/Scripts/utill.py", "--togglemic"]
+        command: root.newUtill(["--togglemic"])
         stdout: StdioCollector {
-            onStreamFinished: setState(this.text)
+            onStreamFinished: micButton.setState(this.text)
         }
+    }
+
+    IconButton {
+        id: songButton
+        color: root.settings.theme.primary
+        iconName: root.media.status == "Playing" ? "music_note_single" : "music_off"
+        iconSize: 22
+        visible: root.media.status == "Playing" ? true : (root.media.status == "Paused" ? true : false)
+        tooltipText: {
+            return root.media.title + " : " + root.media.artist
+        }
+        onClicked: toggleCommand.running = true
+        Process { id: toggleCommand; command: ["playerctl", "play-pause"] }
     }
 
     IconButton {
@@ -48,7 +61,7 @@ RowLayout{
         function setState(state){
             if (state.includes("off")){
                 micButton.setIcon("microphone_mute")
-                micButton.setColor('#848484')
+                micButton.setColor(root.settings.theme.primary)
                 micButton.tooltipText = "Toggle Mic: On"
             } else if (state.includes("on")) { 
                 micButton.setIcon("microphone")

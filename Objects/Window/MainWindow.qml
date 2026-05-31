@@ -101,6 +101,7 @@ PanelWindow {
                         id: settingsIconButton
                         iconName: "settings"
                         iconSize: 22
+                        color: root.settings.theme.primary
                         tooltipText: "Open Settings"
                         onClicked: {
                             settingsPopupWin.toggle(settingsIconButton) 

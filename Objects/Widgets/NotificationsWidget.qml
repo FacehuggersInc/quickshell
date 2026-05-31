@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell.Widgets
 import QtQuick.Layouts
 
+import qs.Objects.Design
 import qs.Objects.Window
 
 IconButton {

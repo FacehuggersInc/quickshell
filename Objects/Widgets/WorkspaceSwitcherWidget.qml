@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell.Hyprland
 
+import qs.Objects.Design
 import qs.Objects.Window
 import qs.Objects.Widgets
 

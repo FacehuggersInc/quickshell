@@ -5,6 +5,7 @@ import Quickshell.Widgets
 import QtQuick.Layouts
 import QtQuick.Controls
 
+import qs.Objects.Design
 import qs.Objects.Window
 import qs.Objects.Widgets
 

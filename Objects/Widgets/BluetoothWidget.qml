@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell.Widgets
 import QtQuick.Layouts
 
+import qs.Objects.Design
 import qs.Objects.Window
 import qs.Objects.Widgets
 
@@ -12,7 +13,7 @@ IconButton {
     iconName: "bluetooth"
     iconSize: 25
     tooltipText: "Bluetooth"
-    color: '#252525'
+    color: root.settings.theme.secondary
 
     property bool powered: false
     property int connectedCount: 0
@@ -42,7 +43,7 @@ IconButton {
                 })
                 bluetoothWidget.powered = obj["powered"] === "yes"
                 bluetoothWidget.setIcon(bluetoothWidget.powered ? "bluetooth" : "bluetooth_disabled")
-                bluetoothWidget.setColor(bluetoothWidget.powered ? "#ffffff" : "#252525")
+                bluetoothWidget.setColor(bluetoothWidget.powered ? root.settings.theme.primary : root.settings.theme.secondary)
                 bluetoothWidget.tooltipText = bluetoothWidget.powered
                     ? "Bluetooth: On"
                     : "Bluetooth: Off"
