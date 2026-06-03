@@ -17,7 +17,6 @@
         "setWallpaperCommand": "awww img -o {display} {wallpaper}",
         "smartCrop": true
     },
-    "smartCrop": true,
     "iconsPath": "/home/fach/.local/share/icons/material/",
     "volumePercentageOffset": 0,
     "fontFamily": "JetBrainsMono",
