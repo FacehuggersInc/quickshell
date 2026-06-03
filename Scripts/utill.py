@@ -767,6 +767,152 @@ class Utill():
 
         return "\n".join(commands) if commands else "none"
 
+    # ── SMART CROP ───────────────────────────────────────────────────────────
+
+    @argfunc
+    def smartcrop(self, *args):
+        """Crop a wallpaper to fit a vertical monitor, centering on the most
+        visually interesting horizontal region.
+
+        Args: wallpaper_path monitor_width monitor_height
+
+        Returns: path to cropped temp file, or original path if no crop needed.
+        The caller is responsible for deleting the temp file after use.
+        """
+        if len(args) < 3:
+            return args[0] if args else ""
+
+        wallpaper_path = args[0]
+        try:
+            mon_w = int(args[1])
+            mon_h = int(args[2])
+        except ValueError:
+            return wallpaper_path
+
+        try:
+            from PIL import Image
+            import numpy as np
+            import tempfile
+        except ImportError:
+            return wallpaper_path
+
+        # Only process vertical monitors
+        if mon_h <= mon_w:
+            return wallpaper_path
+
+        try:
+            img = Image.open(wallpaper_path)
+        except Exception:
+            return wallpaper_path
+
+        img_w, img_h = img.size
+        mon_ratio  = mon_w / mon_h
+        img_ratio  = img_w / img_h
+
+        # Check if crop is needed — skip if ratios are close enough
+        # Threshold: within 15% relative difference
+        ratio_diff = abs(img_ratio - mon_ratio) / mon_ratio
+        if ratio_diff < 0.15:
+            return wallpaper_path
+
+        # ── Saliency: find most interesting horizontal region ─────────────────
+        # Downsample for speed, convert to grayscale, compute column variance
+        thumb_h = 200
+        scale   = thumb_h / img_h
+        thumb_w = max(1, int(img_w * scale))
+        thumb   = img.resize((thumb_w, thumb_h), Image.LANCZOS).convert("L")
+        arr     = np.array(thumb, dtype=np.float32)
+
+        # Column variance — high variance = interesting content
+        col_variance = np.var(arr, axis=0)  # shape: (thumb_w,)
+
+        # Check if variance is too balanced (flat/uniform image) — leave alone
+        var_max  = col_variance.max()
+        var_mean = col_variance.mean()
+        if var_max == 0 or (var_max - var_mean) / (var_max + 1e-6) < 0.1:
+            # Variance is too uniform — content is spread evenly, don't crop
+            return wallpaper_path
+
+        # Find center of mass of variance — weighted average of column positions
+        cols      = np.arange(thumb_w, dtype=np.float32)
+        salient_x = np.sum(cols * col_variance) / np.sum(col_variance)
+
+        # Map salient_x back to original image coordinates
+        salient_x_orig = salient_x / scale
+
+        # ── Determine crop dimensions ─────────────────────────────────────────
+        # Target width that matches monitor aspect ratio at full image height
+        target_w = int(img_h * mon_ratio)
+
+        if target_w >= img_w:
+            # Image is narrower than needed — scale to fit width, crop height
+            # (landscape on a portrait monitor: center vertically)
+            target_h = int(img_w / mon_ratio)
+            top  = max(0, (img_h - target_h) // 2)
+            box  = (0, top, img_w, top + target_h)
+        else:
+            # Image is wider than target — crop width, centering on salient_x
+            half_w  = target_w / 2
+            crop_x1 = salient_x_orig - half_w
+            crop_x2 = salient_x_orig + half_w
+
+            # Clamp to image bounds
+            if crop_x1 < 0:
+                crop_x2 -= crop_x1
+                crop_x1  = 0
+            if crop_x2 > img_w:
+                crop_x1 -= (crop_x2 - img_w)
+                crop_x2  = img_w
+            crop_x1 = max(0, int(crop_x1))
+            crop_x2 = min(img_w, int(crop_x2))
+            box = (crop_x1, 0, crop_x2, img_h)
+
+        # ── Crop and save to temp file ────────────────────────────────────────
+        cropped = img.crop(box)
+        ext     = os.path.splitext(wallpaper_path)[1] or ".png"
+        tmp     = tempfile.NamedTemporaryFile(
+            suffix=ext,
+            prefix="qs_wallpaper_",
+            dir="/tmp",
+            delete=False
+        )
+        tmp.close()
+
+        # Preserve format
+        fmt_map = {".jpg": "JPEG", ".jpeg": "JPEG", ".png": "PNG",
+                   ".webp": "WEBP", ".bmp": "BMP"}
+        fmt = fmt_map.get(ext.lower(), "PNG")
+        cropped.save(tmp.name, fmt)
+
+        return tmp.name
+
+    @argfunc
+    def getmonitorres(self, *args):
+        """Returns monitor resolutions as: connector:width:height|...
+        Uses hyprctl monitors -j
+        """
+        result = subprocess.run(
+            ["hyprctl", "monitors", "-j"],
+            capture_output=True, text=True
+        )
+        monitors = {}
+        try:
+            data = json.loads(result.stdout.strip())
+            for m in data:
+                name = m.get("name", "")
+                w    = m.get("width",  0)
+                h    = m.get("height", 0)
+                # Account for transform (90/270 degree rotation swaps w/h)
+                transform = m.get("transform", 0)
+                if transform in [1, 3, 5, 7]:  # 90, 270, flipped+90, flipped+270
+                    w, h = h, w
+                if name:
+                    monitors[name] = (w, h)
+        except Exception:
+            pass
+
+        return "|".join([f"{name}:{w}:{h}" for name, (w, h) in monitors.items()])
+
 
     # ── COLOR HISTORY ────────────────────────────────────────────────────────
 

@@ -35,8 +35,23 @@ PopupWindow {
     // ── Brightness (ddcutil) ─────────────────────────────────────
     property var displayNames: []        // populated from ddcdetect on open
     property var brightnessValues: []    // one entry per detected display
+    property bool brightnessBeingDragged: false  // prevents poll overwriting mid-drag
 
-    // Debounce — ddcutil is slow (~0.5s/display), don't call on every tick
+    // Global brightness debounce — sets all displays at once
+    Timer {
+        id: globalBrightnessDebounce
+        interval: 350
+        repeat: false
+        property int pendingValue: 50
+        onTriggered: {
+            // Fire one ddcsetbrightness per display in parallel via separate procs
+            for (var i = 0; i < generalSettingsPopup.brightnessValues.length; i++) {
+                root.execute(root.newUtill(["--ddcsetbrightness", i + 1, pendingValue]))
+            }
+        }
+    }
+
+    // Per-display debounce — ddcutil is slow (~0.5s/display), don't call on every tick
     Timer {
         id: brightnessDebounce
         interval: 350
@@ -80,7 +95,9 @@ PopupWindow {
                     var max     = parseInt(parts[2])
                     vals.push(max > 0 ? Math.round((current / max) * 100) : 50)
                 }
-                generalSettingsPopup.brightnessValues = vals
+                // Don't overwrite while user is dragging a slider
+                if (!generalSettingsPopup.brightnessBeingDragged)
+                    generalSettingsPopup.brightnessValues = vals
             }
         }
     }
@@ -294,14 +311,574 @@ PopupWindow {
                 width: panelWidth - 24
                 spacing: 2
 
-                // ── MANAGE ───────────────────────────────────────
+                // ── WALLPAPER ─────────────────────────────────────
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
+
                 TextDivider {
-                    dividerText: "Manage"
+                    dividerText: "Wallpaper"
                     dividerHeight: 2
                     Layout.fillWidth: true
                 }
 
-                // Brightness — one row per detected display
+                // Wallpaper interval
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    IconButton {
+                        iconName: "wallpaper"
+                        iconSize: 20
+                        color: root.settings.theme.primary
+                        opacity: 0.7
+                        tooltipText: "Wallpaper change interval"
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        Text {
+                            text: "Wallpaper Interval"
+                            color: root.settings.theme.text
+                            font.family: root.settings.fontFamily
+                            font.weight: 500
+                            font.pixelSize: 14
+                        }
+
+                        Text {
+                            text: "e.g. 30s · 5m · 1h 30m · 2h · 90000ms"
+                            color: root.settings.theme.text
+                            opacity: 0.35
+                            font.family: root.settings.fontFamily
+                            font.pixelSize: 11
+                        }
+                    }
+
+                    // Editable field — accepts readable (30s, 5m, 1h 30m) or raw ms
+                    Rectangle {
+                        width: 150
+                        height: 36
+                        radius: 6
+                        color: root.settings.theme.surface
+
+                        // Border flashes red on bad input
+                        border.color: intervalField.hasError
+                            ? "#e05555"
+                            : intervalField.activeFocus
+                                ? root.settings.theme.primary
+                                : "transparent"
+                        border.width: 1
+
+                        Behavior on border.color { ColorAnimation { duration: 120 } }
+
+                        TextField {
+                            id: intervalField
+                            anchors.fill: parent
+                            anchors.margins: 6
+                            font.family: root.settings.fontFamily
+                            font.pixelSize: 13
+                            color: root.settings.theme.text
+                            background: Item {}
+                            horizontalAlignment: Text.AlignHCenter
+                            selectByMouse: true
+
+                            property bool hasError: false
+                            property bool userEditing: false
+
+                            // Convert ms to readable on load / when not editing
+                            function msToReadable(ms) {
+                                var secs = Math.round(ms / 1000)
+                                if (secs < 60) return secs + "s"
+                                var m = Math.floor(secs / 60)
+                                var s = secs % 60
+                                if (m < 60) return s > 0 ? m + "m " + s + "s" : m + "m"
+                                var h = Math.floor(m / 60)
+                                var rem = m % 60
+                                return rem > 0 ? h + "h " + rem + "m" : h + "h"
+                            }
+
+                            // Parse readable or raw ms → milliseconds
+                            // Returns -1 on invalid input
+                            function parseToMs(input) {
+                                input = input.trim().toLowerCase()
+                                if (!input) return -1
+
+                                // Raw ms number
+                                if (/^\d+ms$/.test(input)) return parseInt(input)
+                                if (/^\d+$/.test(input))   return parseInt(input)  // bare number = ms
+
+                                // Compound: 1h 30m 10s (any combination)
+                                var total = 0
+                                var matched = false
+                                var hoursMatch  = input.match(/(\d+(?:\.\d+)?)\s*h/)
+                                var minsMatch   = input.match(/(\d+(?:\.\d+)?)\s*m(?!s)/)
+                                var secsMatch   = input.match(/(\d+(?:\.\d+)?)\s*s/)
+                                if (hoursMatch) { total += parseFloat(hoursMatch[1])  * 3600000; matched = true }
+                                if (minsMatch)  { total += parseFloat(minsMatch[1])   * 60000;   matched = true }
+                                if (secsMatch)  { total += parseFloat(secsMatch[1])   * 1000;    matched = true }
+                                if (matched && total > 0) return Math.round(total)
+
+                                return -1
+                            }
+
+                            Component.onCompleted: {
+                                text = msToReadable(root.settings.wallpapers.interval || 300000)
+                            }
+
+                            onActiveFocusChanged: {
+                                if (activeFocus) {
+                                    userEditing = true
+                                } else {
+                                    // Commit on focus loss
+                                    commitValue()
+                                }
+                            }
+
+                            onAccepted: commitValue()
+
+                            function commitValue() {
+                                var ms = parseToMs(text)
+                                var maxMs = 43200000  // 12 hours
+                                var minMs = 5000      // 5 seconds
+
+                                if (ms < 0 || ms < minMs || ms > maxMs) {
+                                    hasError = true
+                                    errorResetTimer.restart()
+                                    // Restore current value
+                                    text = msToReadable(root.settings.wallpapers.interval || 300000)
+                                    return
+                                }
+
+                                hasError = false
+                                // setWallpaperInterval saves AND updates the live timer
+                                root.setWallpaperInterval(ms)
+                                // Reformat to canonical readable form
+                                text = msToReadable(ms)
+                                userEditing = false
+                            }
+
+                            Timer {
+                                id: errorResetTimer
+                                interval: 1500
+                                onTriggered: intervalField.hasError = false
+                            }
+                        }
+                    }
+                }
+
+                // Smart crop for vertical monitors
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    IconButton {
+                        iconName: "wallpaper"
+                        iconSize: 20
+                        color: root.settings.theme.primary
+                        opacity: (root.settings.wallpapers.smartCrop || false) ? 1.0 : 0.45
+                        tooltipText: "Smart crop for vertical monitors"
+                        onClicked: {
+                            root.settings.wallpapers.smartCrop = !(root.settings.wallpapers.smartCrop || false)
+                            root.saveSettings()
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Text {
+                            text: "Smart Crop (Vertical Monitors)"
+                            color: root.settings.theme.text
+                            font.family: root.settings.fontFamily
+                            font.weight: 500
+                            font.pixelSize: 14
+                            Layout.fillWidth: true
+                        }
+                        Text {
+                            text: (root.settings.wallpapers.smartCrop || false)
+                                ? "Cropping to subject center on portrait displays"
+                                : "Using wallpapers as-is on all displays"
+                            color: root.settings.theme.text
+                            opacity: 0.45
+                            font.family: root.settings.fontFamily
+                            font.pixelSize: 11
+                        }
+                    }
+
+                    Rectangle {
+                        width: 44
+                        height: 24
+                        radius: 12
+                        color: (root.settings.wallpapers.smartCrop || false)
+                            ? root.settings.theme.primary
+                            : Qt.rgba(1, 1, 1, 0.15)
+
+                        Behavior on color { ColorAnimation { duration: 150 } }
+
+                        Rectangle {
+                            width: 18; height: 18; radius: 9
+                            color: root.settings.theme.text
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: (root.settings.wallpapers.smartCrop || false)
+                                ? parent.width - width - 3 : 3
+                            Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.InOutQuad } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.settings.wallpapers.smartCrop = !(root.settings.wallpapers.smartCrop || false)
+                                root.saveSettings()
+                            }
+                        }
+                    }
+                }
+
+                // Wallpaper mode — 3-state toggle: day / auto / night
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    IconButton {
+                        iconName: root.wallpaperMode === 1 ? "light_mode"
+                            : root.wallpaperMode === 2 ? "dark_mode"
+                            : "wallpaper"
+                        iconSize: 20
+                        color: root.settings.theme.primary
+                        opacity: root.wallpaperMode === 0 ? 0.45 : 1.0
+                        tooltipText: root.wallpaperMode === 1 ? "Force Day Mode"
+                            : root.wallpaperMode === 2 ? "Force Night Mode"
+                            : "Auto (following schedule)"
+                        onClicked: {
+                            root.wallpaperMode = (root.wallpaperMode + 1) % 3
+                            root.settings.wallpaperMode = root.wallpaperMode
+                            root.saveSettings()
+                            root.nextWallpaper()
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Text {
+                            text: "Wallpaper Mode"
+                            color: root.settings.theme.text
+                            font.family: root.settings.fontFamily
+                            font.weight: 500
+                            font.pixelSize: 14
+                            Layout.fillWidth: true
+                        }
+                        Text {
+                            text: root.wallpaperMode === 1 ? "Always day wallpapers"
+                                : root.wallpaperMode === 2 ? "Always night wallpapers"
+                                : "Following dark hour schedule"
+                            color: root.settings.theme.text
+                            opacity: 0.45
+                            font.family: root.settings.fontFamily
+                            font.pixelSize: 11
+                        }
+                    }
+
+                    // 3-state toggle track
+                    // Position: left=day(1), center=auto(0), right=night(2)
+                    Rectangle {
+                        id: threeStateTrack
+                        width: 66
+                        height: 24
+                        radius: 12
+                        color: root.wallpaperMode === 1
+                            ? "#f5a623"                       // amber for day
+                            : root.wallpaperMode === 2
+                                ? root.settings.theme.primary // themed for night
+                                : Qt.rgba(1, 1, 1, 0.15)      // neutral for auto
+
+                        Behavior on color { ColorAnimation { duration: 150 } }
+
+                        // Three position dots (day · auto · night)
+                        Row {
+                            anchors.centerIn: parent
+                            spacing: 6
+                            Repeater {
+                                model: 3
+                                Rectangle {
+                                    width: 4; height: 4; radius: 2
+                                    color: root.settings.theme.text
+                                    opacity: 0.3
+                                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                                }
+                            }
+                        }
+
+                        // Sliding thumb
+                        Rectangle {
+                            width: 18
+                            height: 18
+                            radius: 9
+                            color: root.settings.theme.text
+                            anchors.verticalCenter: parent.verticalCenter
+                            // day=left(1), auto=center(0), night=right(2)
+                            x: root.wallpaperMode === 1 ? 3
+                             : root.wallpaperMode === 2 ? threeStateTrack.width - width - 3
+                             : (threeStateTrack.width - width) / 2
+
+                            Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.InOutQuad } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.wallpaperMode = (root.wallpaperMode + 1) % 3
+                                root.settings.wallpaperMode = root.wallpaperMode
+                                root.saveSettings()
+                                root.nextWallpaper()
+                            }
+                        }
+                    }
+                }
+
+                // Dark mode hours
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    IconButton {
+                        iconName: "dark_mode"
+                        iconSize: 20
+                        color: root.settings.theme.primary
+                        tooltipText: "Dark mode hours"
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        Text {
+                            text: "Dark Mode Hours"
+                            color: root.settings.theme.text
+                            font.family: root.settings.fontFamily
+                            font.weight: 500
+                            font.pixelSize: 14
+                        }
+
+                        // "From" hour
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Text {
+                                text: "From"
+                                color: root.settings.theme.text
+                                opacity: 0.55
+                                font.family: root.settings.fontFamily
+                                font.pixelSize: 12
+                                Layout.preferredWidth: 36
+                            }
+
+                            CustomSlider {
+                                id: darkHourAtSlider
+                                Layout.fillWidth: true
+                                from: 0
+                                to: 23
+                                stepSize: 1
+                                handleBorderWidth: 0
+
+                                Binding {
+                                    target: darkHourAtSlider
+                                    property: "value"
+                                    value: root.settings.wallpapers.darkModeHours.at || 20
+                                    when: !darkHourAtSlider.pressed
+                                }
+
+                                onMoved: {
+                                    root.settings.wallpapers.darkModeHours.at = Math.round(this.value)
+                                    root.saveSettings()
+                                }
+                            }
+
+                            Text {
+                                text: {
+                                    var h = Math.round(darkHourAtSlider.value)
+                                    var suffix = h >= 12 ? "pm" : "am"
+                                    var display = h > 12 ? h - 12 : (h === 0 ? 12 : h)
+                                    return display + suffix
+                                }
+                                color: root.settings.theme.text
+                                font.family: root.settings.fontFamily
+                                font.pixelSize: 13
+                                font.weight: 500
+                                Layout.preferredWidth: 38
+                            }
+                        }
+
+                        // "Until" hour
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Text {
+                                text: "Until"
+                                color: root.settings.theme.text
+                                opacity: 0.55
+                                font.family: root.settings.fontFamily
+                                font.pixelSize: 12
+                                Layout.preferredWidth: 36
+                            }
+
+                            CustomSlider {
+                                id: darkHourBeforeSlider
+                                Layout.fillWidth: true
+                                from: 0
+                                to: 23
+                                stepSize: 1
+                                handleBorderWidth: 0
+
+                                Binding {
+                                    target: darkHourBeforeSlider
+                                    property: "value"
+                                    value: root.settings.wallpapers.darkModeHours.before || 7
+                                    when: !darkHourBeforeSlider.pressed
+                                }
+
+                                onMoved: {
+                                    root.settings.wallpapers.darkModeHours.before = Math.round(this.value)
+                                    root.saveSettings()
+                                }
+                            }
+
+                            Text {
+                                text: {
+                                    var h = Math.round(darkHourBeforeSlider.value)
+                                    var suffix = h >= 12 ? "pm" : "am"
+                                    var display = h > 12 ? h - 12 : (h === 0 ? 12 : h)
+                                    return display + suffix
+                                }
+                                color: root.settings.theme.text
+                                font.family: root.settings.fontFamily
+                                font.pixelSize: 13
+                                font.weight: 500
+                                Layout.preferredWidth: 38
+                            }
+                        }
+
+                        // Preview of the schedule
+                        Text {
+                            text: {
+                                var at = Math.round(darkHourAtSlider.value)
+                                var before = Math.round(darkHourBeforeSlider.value)
+                                var toStr = function(h) {
+                                    var s = h >= 12 ? "pm" : "am"
+                                    var d = h > 12 ? h - 12 : (h === 0 ? 12 : h)
+                                    return d + s
+                                }
+                                return "Night wallpapers " + toStr(at) + " → " + toStr(before)
+                            }
+                            color: root.settings.theme.primary
+                            opacity: 0.7
+                            font.family: root.settings.fontFamily
+                            font.pixelSize: 11
+                        }
+                    }
+                }
+
+                // ── DISPLAY ───────────────────────────────────────
+                TextDivider {
+                    dividerText: "Display"
+                    dividerHeight: 2
+                    Layout.fillWidth: true
+                }
+
+                // Global brightness — controls all displays at once
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+
+                    IconButton {
+                        iconName: generalSettingsPopup.brightnessValues.length > 0
+                            ? (generalSettingsPopup.brightnessValues.reduce(function(a,b){return a+b},0)
+                               / generalSettingsPopup.brightnessValues.length) > 60
+                                ? "backlight_high"
+                                : (generalSettingsPopup.brightnessValues.reduce(function(a,b){return a+b},0)
+                                   / generalSettingsPopup.brightnessValues.length) > 20
+                                    ? "backlight_low"
+                                    : "backlight_off"
+                            : "backlight_high"
+                        iconSize: 20
+                        color: root.settings.theme.primary
+                        tooltipText: "All Displays"
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+
+                        Text {
+                            text: "All Displays"
+                            color: root.settings.theme.text
+                            opacity: 0.55
+                            font.family: root.settings.fontFamily
+                            font.pixelSize: 11
+                        }
+
+                        CustomSlider {
+                            id: globalBrightnessSlider
+                            Layout.fillWidth: true
+                            from: 1
+                            to: 100
+                            handleBorderWidth: 0
+                            onPressedChanged: generalSettingsPopup.brightnessBeingDragged = pressed
+
+                            Binding {
+                                target: globalBrightnessSlider
+                                property: "value"
+                                value: generalSettingsPopup.brightnessValues.length > 0
+                                    ? Math.round(generalSettingsPopup.brightnessValues.reduce(
+                                        function(a,b){return a+b}, 0)
+                                        / generalSettingsPopup.brightnessValues.length)
+                                    : 50
+                                when: !globalBrightnessSlider.pressed
+                            }
+                            onMoved: {
+                                var v = Math.round(this.value)
+                                var newVals = []
+                                for (var i = 0; i < generalSettingsPopup.brightnessValues.length; i++) {
+                                    newVals.push(v)
+                                }
+                                generalSettingsPopup.brightnessValues = newVals
+                                globalBrightnessDebounce.pendingValue = v
+                                globalBrightnessDebounce.restart()
+                            }
+                        }
+                    }
+
+                    Text {
+                        text: generalSettingsPopup.brightnessValues.length > 0
+                            ? Math.round(generalSettingsPopup.brightnessValues.reduce(
+                                function(a,b){return a+b},0)
+                                / generalSettingsPopup.brightnessValues.length) + "%"
+                            : "?%"
+                        color: root.settings.theme.text
+                        font.family: root.settings.fontFamily
+                        font.weight: 500
+                        font.pixelSize: 14
+                        Layout.preferredWidth: 38
+                    }
+                }
+
+                // Divider between global and per-display
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: root.settings.theme.text
+                    opacity: 0.08
+                    Layout.topMargin: 4
+                    Layout.bottomMargin: 4
+                }
+
+                // Per-display brightness sliders
                 Repeater {
                     model: generalSettingsPopup.displayNames.length
                     delegate: RowLayout {
@@ -310,7 +887,12 @@ PopupWindow {
                         spacing: 10
 
                         IconButton {
-                            iconName: "show"
+                            iconName: {
+                                var v = generalSettingsPopup.brightnessValues[index] || 50
+                                if (v > 60) return "backlight_high"
+                                if (v > 20) return "backlight_low"
+                                return "backlight_off"
+                            }
                             iconSize: 20
                             color: root.settings.theme.primary
                             tooltipText: generalSettingsPopup.displayNames[index] || ""
@@ -331,8 +913,16 @@ PopupWindow {
                             from: 1
                             to: 100
                             handleBorderWidth: 0
-                            value: generalSettingsPopup.brightnessValues[index] || 50
+                            id: perDisplaySlider
+                            onPressedChanged: generalSettingsPopup.brightnessBeingDragged = pressed
                             onMoved: generalSettingsPopup.setBrightness(index + 1, Math.round(this.value))
+
+                            Binding {
+                                target: perDisplaySlider
+                                property: "value"
+                                value: generalSettingsPopup.brightnessValues[index] || 50
+                                when: !perDisplaySlider.pressed
+                            }
                         }
 
                         Text {
@@ -345,6 +935,59 @@ PopupWindow {
                         }
                     }
                 }
+
+                }  // end Wallpaper/Display ColumnLayout
+
+                // ── QUICK ACCESS ──────────────────────────────────
+                TextDivider {
+                    dividerText: "Quick Access"
+                    dividerHeight: 2
+                    Layout.fillWidth: true
+                }
+                ActionRow {
+                    iconName: "wallpaper"
+                    label: "Next Wallpaper"
+                    onClicked: root.nextWallpaper()
+                }
+                ActionRow {
+                    iconName: "open_folder"
+                    label: "File Manager"
+                    description: "nautilus"
+                    onClicked: root.execute(["nautilus"])
+                }
+                ActionRow {
+                    iconName: "terminal"
+                    label: "Terminal"
+                    description: "ghostty"
+                    onClicked: root.execute(["ghostty"])
+                }
+                ActionRow {
+                    iconName: "copy_content"
+                    label: "Color Picker"
+                    description: colorPickerProc.running ? "picking..." : "hyprpicker"
+                    onClicked: {
+                        if (!colorPickerProc.running) colorPickerProc.running = true
+                    }
+                }
+                ActionRow {
+                    iconName: "screenshot"
+                    label: "Screenshot"
+                    description: "flameshot gui"
+                    onClicked: root.execute(["flameshot", "gui"])
+                }
+
+                // USB drives — only visible when drives are mounted
+                Repeater {
+                    model: generalSettingsPopup.usbDrives
+                    delegate: ActionRow {
+                        required property var modelData
+                        iconName: "open_folder"
+                        label: modelData.label
+                        description: modelData.mountpoint
+                        onClicked: root.execute(["nautilus", modelData.mountpoint])
+                    }
+                }
+
 
                 // ── CONFIGURATIONS ────────────────────────────────
                 TextDivider {
@@ -406,56 +1049,6 @@ PopupWindow {
                     }
                 }
 
-
-                // ── QUICK ACCESS ──────────────────────────────────
-                TextDivider {
-                    dividerText: "Quick Access"
-                    dividerHeight: 2
-                    Layout.fillWidth: true
-                }
-                ActionRow {
-                    iconName: "wallpaper"
-                    label: "Next Wallpaper"
-                    onClicked: root.nextWallpaper()
-                }
-                ActionRow {
-                    iconName: "open_folder"
-                    label: "File Manager"
-                    description: "nautilus"
-                    onClicked: root.execute(["nautilus"])
-                }
-                ActionRow {
-                    iconName: "terminal"
-                    label: "Terminal"
-                    description: "ghostty"
-                    onClicked: root.execute(["ghostty"])
-                }
-                ActionRow {
-                    iconName: "copy_content"
-                    label: "Color Picker"
-                    description: colorPickerProc.running ? "picking..." : "hyprpicker"
-                    onClicked: {
-                        if (!colorPickerProc.running) colorPickerProc.running = true
-                    }
-                }
-                ActionRow {
-                    iconName: "screenshot"
-                    label: "Screenshot"
-                    description: "flameshot gui"
-                    onClicked: root.execute(["flameshot", "gui"])
-                }
-
-                // USB drives — only visible when drives are mounted
-                Repeater {
-                    model: generalSettingsPopup.usbDrives
-                    delegate: ActionRow {
-                        required property var modelData
-                        iconName: "open_folder"
-                        label: modelData.label
-                        description: modelData.mountpoint
-                        onClicked: root.execute(["nautilus", modelData.mountpoint])
-                    }
-                }
 
                 // ── POWER ─────────────────────────────────────────
                 TextDivider {

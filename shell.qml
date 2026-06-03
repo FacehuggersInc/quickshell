@@ -26,6 +26,30 @@ ShellRoot {
     property var settings: JSON.parse(configFile.text()) 
     property var utill: ["python3", "/home/fach/.config/quickshell/Scripts/utill.py"]
     property bool initialDarkHourCheck: false
+    property var monitorResolutions: ({})  // name -> {w, h}
+
+    // Fetch monitor resolutions once on startup
+    Process {
+        id: monitorResProc
+        command: root.newUtill(["--getmonitorres"])
+        running: true
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var text = this.text.trim()
+                if (!text) return
+                var res = {}
+                text.split("|").forEach(function(entry) {
+                    var parts = entry.split(":")
+                    if (parts.length >= 3) {
+                        res[parts[0]] = { w: parseInt(parts[1]), h: parseInt(parts[2]) }
+                    }
+                })
+                root.monitorResolutions = res
+            }
+        }
+    }
+    // wallpaperMode: 0=auto (follow dark hours), 1=force day, 2=force night
+    property int wallpaperMode: root.settings.wallpaperMode || 0
 
 
     // FUNCTIONS
@@ -84,6 +108,12 @@ ShellRoot {
         return settings.iconsPath + name + ".png"
     }
 
+    function setWallpaperInterval(ms) {
+        root.settings.wallpapers.interval = ms
+        wallpaperSwitchTimer.interval = ms
+        root.saveSettings()
+    }
+
     function nextWallpaper(){
         wallpaperSwitchTimer.restart()
         checkDarkHour()
@@ -93,6 +123,18 @@ ShellRoot {
         if (!initialDarkHourCheck) {
             wallpaperSwitchTimer.interval = settings.wallpapers.interval
             initialDarkHourCheck = true 
+        }
+
+        // wallpaperMode overrides the hour check
+        if (root.wallpaperMode === 1) {
+            wallpaperRandomChoice.wallpaperFolder = settings.wallpapers.day
+            wallpaperRandomChoice.running = true
+            return
+        }
+        if (root.wallpaperMode === 2) {
+            wallpaperRandomChoice.wallpaperFolder = settings.wallpapers.night
+            wallpaperRandomChoice.running = true
+            return
         }
 
         var hour = new Date().getHours()
@@ -239,9 +281,42 @@ ShellRoot {
         id: mediaSystem
     }
 
+    // Smart crop process — handles vertical monitor wallpapers
+    Process {
+        id: smartCropProc
+        property string wallpaper: ""
+        property int    monW: 0
+        property int    monH: 0
+        property string displayName: ""
+        property string rawCommand: ""
+        property string lastTempFile: ""
+
+        command: root.newUtill(["--smartcrop", wallpaper, monW, monH])
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                var result = this.text.trim()
+                if (!result) return
+
+                // Clean up previous temp file
+                if (smartCropProc.lastTempFile !== ""
+                        && smartCropProc.lastTempFile !== smartCropProc.wallpaper) {
+                    root.execute(["rm", "-f", smartCropProc.lastTempFile])
+                }
+
+                smartCropProc.lastTempFile = result
+
+                // Set the wallpaper with cropped (or original) path
+                var cmd = smartCropProc.rawCommand
+                    .replace("{wallpaper}", result)
+                root.execute(cmd.split(" "))
+            }
+        }
+    }
+
     // -- THEME
     Timer{
-        id: themeCheckTimer 
+        id: themeCheckTimer
         interval: 100
         running: false
         repeat: true
@@ -311,7 +386,28 @@ ShellRoot {
                     } else {
                         wallpaper = wallpapers[0].trim()
                     }
-                    setWallpaperCommand = setWallpaperCommand.replace( "{wallpaper}", wallpaper )
+
+                    // Smart crop for vertical monitors if setting enabled
+                    var finalWallpaper = wallpaper
+                    if (settings.wallpapers.smartCrop) {
+                        var displayName = settings.wallpapers.displays[i]
+                        var monRes = root.monitorResolutions[displayName]
+                        if (monRes && monRes.h > monRes.w) {
+                            // Vertical monitor — run smartcrop synchronously via proc
+                            // We use a blocking call pattern here by launching the command
+                            // and substituting inline. Since execDetached is async we
+                            // store the crop path and use it in a separate proc.
+                            smartCropProc.wallpaper   = wallpaper
+                            smartCropProc.monW        = monRes.w
+                            smartCropProc.monH        = monRes.h
+                            smartCropProc.displayName = displayName
+                            smartCropProc.rawCommand  = setWallpaperCommand
+                            smartCropProc.running     = true
+                            continue  // handled by smartCropProc
+                        }
+                    }
+
+                    setWallpaperCommand = setWallpaperCommand.replace( "{wallpaper}", finalWallpaper )
                     execute( setWallpaperCommand.split(" ") )
                 }
                 
@@ -323,6 +419,5 @@ ShellRoot {
     }
 
     // -- UI OBJECTS
-
     property MainWindow main: MainWindow {}
 }
