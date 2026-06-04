@@ -266,12 +266,6 @@ class Utill():
                 continue
         return "Nothing"
 
-    # ── THEME ────────────────────────────────────────────────────────────────
-
-    @argfunc
-    def generatetheme(self, *args):
-        return build_theme(args[1:], args[0])
-
     # ── HYPRLAND / WINDOWS ───────────────────────────────────────────────────
 
     @argfunc

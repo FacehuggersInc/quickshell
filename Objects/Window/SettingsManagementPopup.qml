@@ -1059,8 +1059,8 @@ PopupWindow {
                 ActionRow {
                     iconName: "lock"
                     label: "Lock Screen"
-                    description: "loginctl lock-session"
-                    onClicked: root.execute(["loginctl", "lock-session"])
+                    description: "hyprshutdown, hyprctl dispatch exit"
+                    onClicked: root.execute(["bash", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"])
                 }
                 ActionRow {
                     iconName: "hide"

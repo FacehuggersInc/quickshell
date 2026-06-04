@@ -11,7 +11,7 @@
         ],
         "primaryDisplayIndex": 1,
         "randomWallpaperPerDisplay": true,
-        "interval": 120000,
+        "interval": 600000,
         "day": "/home/fach/Pictures/Wallpapers/Day/",
         "night": "/home/fach/Pictures/Wallpapers/Night/",
         "setWallpaperCommand": "awww img -o {display} {wallpaper}",
@@ -22,11 +22,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#100d0e",
-        "surface": "#222222",
-        "primary": "#5b6360",
-        "secondary": "#474c4a",
-        "text": "#c8e2d9"
+        "background": "#3b0000",
+        "surface": "#520000",
+        "primary": "#a63c35",
+        "secondary": "#892522",
+        "text": "#ffb39d"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -56,14 +56,13 @@
             "command": "/opt/visual-studio-code/code",
             "options": [
                 [
-                    "/home/fach/.config/hypr/"
-                ],
-                [
                     "/home/fach/.config/quickshell/"
                 ],
                 [
-                    "(Ex",
-                    "SSD)/.RECOVERY/.startmailrecovery"
+                    "/home/fach/.config/hypr/"
+                ],
+                [
+                    "/home/fach/.config/mimeapps.list"
                 ]
             ]
         },
@@ -74,22 +73,22 @@
             "command": "ghostty",
             "options": [
                 [
+                    "--gtk-single-instance=true",
+                    "-e",
+                    "appimagelauncherd",
+                    "/home/fach/Launchers/PINCE.appimage"
+                ],
+                [
+                    "--gtk-single-instance=true",
+                    "-e",
+                    "appimagelauncherd",
+                    "/mnt/ssd-games/Emulators/DuskLight/Dusklight-v1.1.1-linux-x86_64.AppImage"
+                ],
+                [
                     "-e",
                     "bash",
                     "-c",
                     "r2modman"
-                ],
-                [
-                    "-e",
-                    "bash",
-                    "-c",
-                    "nautilus",
-                    "."
-                ],
-                [
-                    "-e",
-                    "tail",
-                    "-f"
                 ]
             ]
         },
@@ -200,6 +199,13 @@
             "nickname": "",
             "icon": "/usr/share/icons/Papirus/64x64/apps/aseprite.svg",
             "command": "/mnt/ssd-games/SteamLibrary/steamapps/common/Aseprite/aseprite",
+            "options": []
+        },
+        {
+            "name": "localsend",
+            "nickname": "",
+            "icon": "/usr/share/icons/Papirus/64x64/apps/org.localsend.localsend_app.svg",
+            "command": "localsend",
             "options": []
         }
     ],
