@@ -109,8 +109,9 @@ PanelWindow {
                         SettingsManagementPopup{
                             id: settingsPopupWin
                         }
-                        NotificationsWidget {}
+                        
                     }
+                    NotificationsWidget {}
                 }
             }
         }
