@@ -127,6 +127,53 @@ Replace `USER` with your username and all paths with your actual locations.
 
 ---
 
+## Launchers & Options
+
+Launchers are pinned apps in the app bar. Each launcher maps a window class name to a launch command.
+
+```json
+"launchers": [
+    {
+        "name":     "code",
+        "nickname": "VS Code",
+        "icon":     "/usr/share/icons/Papirus/64x64/apps/code.svg",
+        "command":  "/opt/visual-studio-code/code",
+        "options":  [
+            ["/home/user/project-a"],
+            ["/home/user/project-b"],
+            ["--new-window"]
+        ]
+    }
+]
+```
+
+**Options** are like a Windows Jump List — right-clicking a pinned app shows a menu of launch variants. Each entry in `options` is a list of arguments appended to the launch command when that variant is chosen.
+
+In the example above, right-clicking VS Code shows three entries:
+- `code /home/user/project-a`
+- `code /home/user/project-b`
+- `code --new-window`
+
+**Optional launcher fields:**
+
+| Field | Description |
+|---|---|
+| `nickname` | Display name shown in the bar instead of `name` |
+| `options` | List of argument sets for the right-click jump list |
+| `masque` | Makes another app's windows appear under this pin — `{ "classIncludes": "Electron" }` or `{ "cmdIncludes": "some-process" }` |
+
+**`launcherflags` controls per-launcher behaviour:**
+
+| Flag | Description |
+|---|---|
+| `lockOptions` | Class names whose options are never auto-updated from running process args |
+| `ignoreOptions` | Class names that never show or save options at all |
+| `filters` | Args to strip when capturing options — e.g. `{ "org.gnome.Nautilus": ["--gapplication-service"] }` |
+| `maxOptions` | Max number of options stored per launcher |
+
+
+---
+
 ## Icons
 
 Place all icons in the directory set as `iconsPath`. Required names:
