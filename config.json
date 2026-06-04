@@ -34,18 +34,18 @@
         "logout": "bash -c command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit",
         "restart_shell": "/home/fach/.config/quickshell/Scripts/restart.sh",
         "hypr_reload": "hyprctl reload",
-        "wallpaper_set": "awww img -o {display} {wallpaper} --transition-type fade"
+        "wallpaper_set": "awww img -o {display} {wallpaper}"
     },
     "iconsPath": "/home/fach/.local/share/icons/material/",
     "volumePercentageOffset": 0,
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#100d0e",
-        "surface": "#222222",
-        "primary": "#5b6360",
-        "secondary": "#474c4a",
-        "text": "#c8e2d9"
+        "background": "#0e0e0e",
+        "surface": "#212223",
+        "primary": "#5f6166",
+        "secondary": "#494b4f",
+        "text": "#d7ddea"
     },
     "launcherflags": {
         "maxOptions": 3,

@@ -332,6 +332,11 @@ ShellRoot {
                 var cmd = smartCropProc.rawCommand
                     .replace("{wallpaper}", result)
                 root.execute(cmd.split(" "))
+                // Clean up temp file after a short delay
+                if (result !== smartCropProc.wallpaper) {
+                    cleanupTimer.tempFile = result
+                    cleanupTimer.restart()
+                }
             }
         }
     }
@@ -395,7 +400,9 @@ ShellRoot {
             onStreamFinished: {
                 
                 var wallpapers = this.text.split(",")
-                var rawCommand = settings.wallpapers.setWallpaperCommand
+                var rawCommand = (settings.commands && settings.commands.wallpaper_set)
+                    || settings.wallpapers.setWallpaperCommand
+                    || "swww img -o {display} {wallpaper}"
                 var setWallpaperCommand = rawCommand
                 for (var i = 0; i < settings.wallpapers.displays.length; i++) {
                     setWallpaperCommand = rawCommand
@@ -424,13 +431,16 @@ ShellRoot {
                             smartCropProc.monH        = monRes.h
                             smartCropProc.displayName = displayName
                             smartCropProc.rawCommand  = setWallpaperCommand
+                                .replace("{display}", settings.wallpapers.displays[i])
                             smartCropProc.running     = true
                             continue  // handled by smartCropProc
                         }
                     }
 
-                    setWallpaperCommand = setWallpaperCommand.replace( "{wallpaper}", finalWallpaper )
-                    execute( setWallpaperCommand.split(" ") )
+                    var wallpaperCmd = setWallpaperCommand
+                        .replace("{display}", settings.wallpapers.displays[i])
+                        .replace("{wallpaper}", finalWallpaper)
+                    execute( wallpaperCmd.split(" ") )
                 }
                 
                 root.wallpaperColors.source = Qt.resolvedUrl(wallpapers[settings.wallpapers.primaryDisplayIndex].trim())
@@ -441,6 +451,5 @@ ShellRoot {
     }
 
     // -- UI OBJECTS
-
     property MainWindow main: MainWindow {}
 }
