@@ -266,6 +266,12 @@ class Utill():
                 continue
         return "Nothing"
 
+    # ── THEME ────────────────────────────────────────────────────────────────
+
+    @argfunc
+    def generatetheme(self, *args):
+        return build_theme(args[1:], args[0])
+
     # ── HYPRLAND / WINDOWS ───────────────────────────────────────────────────
 
     @argfunc
@@ -654,25 +660,6 @@ class Utill():
                     if mp.startswith("/"): return f"{mp}|{devName}"
         return "none"
 
-    # ── MISC ─────────────────────────────────────────────────────────────────
-
-    @argfunc
-    def getinterface(self, *args):
-        match args[0]:
-            case "ssid": return "Unknown",
-            case "wired" | "interface":
-                result = subprocess.run(['nmcli'], capture_output=True, text=True)
-                connections = []
-                for line in result.stdout.split('\n'):
-                    if len(line.split(":")) <= 2 and "connected" in line:
-                        if any(inv in line for inv in ["unavailable", "configuration"]): continue
-                        connections.append((line.split(":")[0], "wired" if "Wired" in line else "external"))
-                externals = [c for c in connections if c[1] == "external"]
-                return externals[-1] if len(externals) > 1 else (connections[0] if connections else ("unknown", "wired"))
-
-    @argfunc
-    def generatetheme(self, *args):
-        return build_theme(args[1:], args[0])
     # ── COMMAND HISTORY ──────────────────────────────────────────────────────
 
     @argfunc
