@@ -88,15 +88,14 @@ PanelWindow {
                 RowLayout {
                     spacing: 8
 
+                    ColorPickerWidget {}
                     VolumeWidget {}
-                    InterfaceWidget {}
                     DatetimeWidget { 
                         format: "%I:%M%p %a, %b %d"
                         textColor: '#7be376'
                     }
-                    ColorPickerWidget {}
+                    InterfaceWidget {}
                     BluetoothWidget {}
-                    NotificationsWidget {}
                     IconButton{
                         id: settingsIconButton
                         iconName: "settings"
@@ -110,7 +109,7 @@ PanelWindow {
                         SettingsManagementPopup{
                             id: settingsPopupWin
                         }
-
+                        NotificationsWidget {}
                     }
                 }
             }

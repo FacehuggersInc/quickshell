@@ -145,6 +145,119 @@ class Utill():
                 externals = [c for c in connections if c[1] == "external"]
                 return externals[-1] if len(externals) > 1 else connections[0] if connections else ("unknown", "wired")
 
+    @argfunc
+    def getnetworkinfo(self, *args):
+        """Returns full network info:
+        interface|type|vpn|rx_bytes|tx_bytes|rx_speed|tx_speed
+        type: wired, wireless, unknown
+        vpn: connection name or "no"
+        speeds in bytes/sec
+        """
+        import time
+
+        # VPN device name patterns — tun/tap (OpenVPN), wg (WireGuard), pia
+        VPN_DEV_PREFIXES = ("tun", "tap", "wg", "ppp", "pia", "proton", "nord")
+
+        # Get all active connections
+        result = subprocess.run(
+            ["nmcli", "-t", "-f", "NAME,TYPE,DEVICE,STATE", "con", "show", "--active"],
+            capture_output=True, text=True
+        )
+
+        interface = "unknown"
+        conn_type = "unknown"
+        vpn       = "no"
+
+        for line in result.stdout.splitlines():
+            # nmcli uses : as separator but connection names can contain :
+            # Split from right to get fixed trailing fields
+            parts = line.rsplit(":", 3)
+            if len(parts) < 4: continue
+            name, typ, device, state = parts[0], parts[1], parts[2], parts[3]
+            if state != "activated": continue
+
+            typ_lower = typ.lower()
+            dev_lower = device.lower()
+
+            # Detect VPN by type or device name pattern
+            is_vpn = (
+                "vpn" in typ_lower
+                or "wireguard" in typ_lower
+                or any(dev_lower.startswith(p) for p in VPN_DEV_PREFIXES)
+            )
+
+            if is_vpn:
+                vpn = name if name else device
+                continue
+
+            if "wireless" in typ_lower or "wifi" in typ_lower or "802-11" in typ_lower:
+                interface = device or name
+                conn_type = "wireless"
+            elif "ethernet" in typ_lower or "802-3" in typ_lower:
+                interface = device or name
+                conn_type = "wired"
+            elif conn_type == "unknown":
+                interface = device or name
+                conn_type = "external"
+
+        # Also check /proc/net/dev for any tun/wg device even if nmcli missed it
+        if vpn == "no":
+            try:
+                with open("/proc/net/dev", "r") as f:
+                    for line in f:
+                        dev = line.split(":")[0].strip()
+                        if any(dev.startswith(p) for p in VPN_DEV_PREFIXES) and dev != "":
+                            vpn = dev
+                            break
+            except Exception:
+                pass
+
+        # Get SSID if wireless
+        if conn_type == "wireless":
+            ssid_result = subprocess.run(
+                ["nmcli", "-t", "-f", "ACTIVE,SSID", "dev", "wifi"],
+                capture_output=True, text=True
+            )
+            for line in ssid_result.stdout.splitlines():
+                if line.startswith("yes:"):
+                    ssid = line[4:].strip()
+                    if ssid: interface = ssid
+                    break
+
+        # Get network speeds from /proc/net/dev
+        def read_net_stats(iface):
+            try:
+                with open("/proc/net/dev", "r") as f:
+                    for line in f:
+                        if iface in line:
+                            cols = line.split()
+                            return int(cols[1]), int(cols[9])  # rx, tx bytes
+            except Exception:
+                pass
+            return 0, 0
+
+        # Find best active device for speed stats
+        # Prefer the VPN tunnel device if active, else main interface
+        dev_result = subprocess.run(
+            ["nmcli", "-t", "-f", "DEVICE,STATE", "dev"],
+            capture_output=True, text=True
+        )
+        active_dev = ""
+        for line in dev_result.stdout.splitlines():
+            parts = line.split(":")
+            if len(parts) >= 2 and parts[1] == "connected" and parts[0] not in ("lo",):
+                active_dev = parts[0]
+                break
+
+        rx1, tx1 = read_net_stats(active_dev)
+        time.sleep(0.5)
+        rx2, tx2 = read_net_stats(active_dev)
+
+        rx_speed = max(0, (rx2 - rx1) * 2)
+        tx_speed = max(0, (tx2 - tx1) * 2)
+
+        return f"{interface}|{conn_type}|{vpn}|{rx2}|{tx2}|{rx_speed}|{tx_speed}"
+
     # ── FILESYSTEM UTILS ─────────────────────────────────────────────────────
 
     @argfunc

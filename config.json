@@ -22,11 +22,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#1b070a",
-        "surface": "#2f1d1e",
-        "primary": "#775a55",
-        "secondary": "#5e4442",
-        "text": "#ffd1c1"
+        "background": "#0b092c",
+        "surface": "#1d1f42",
+        "primary": "#5e5d8b",
+        "secondary": "#474771",
+        "text": "#d8d8ff"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -153,14 +153,14 @@
             "command": "nautilus",
             "options": [
                 [
+                    "--new-window",
+                    "/home/fach/.local/share/icons/material/"
+                ],
+                [
                     "."
                 ],
                 [
                     "/home/fach/.local/share/icons/material/"
-                ],
-                [
-                    "(Ex",
-                    "SSD)"
                 ]
             ]
         },
