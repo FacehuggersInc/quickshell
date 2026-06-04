@@ -8,7 +8,7 @@ A Hyprland desktop shell built with Quickshell.
 
 ```bash
 sudo pacman -S quickshell hyprland hyprpicker \
-    xdg-desktop-portal-hyprland swww \
+    xdg-desktop-portal-hyprland awww \
     pipewire wireplumber alsa-utils playerctl \
     bluez bluez-utils bluez-plugins \
     ddcutil udisks2 networkmanager \
@@ -91,7 +91,7 @@ Edit `~/.config/quickshell/config.json` — required fields:
         "logout":            "bash -c command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit",
         "restart_shell":     "/home/USER/.config/quickshell/Scripts/restart.sh",
         "hypr_reload":       "hyprctl reload",
-        "wallpaper_set":     "swww img -o {display} {wallpaper}"
+        "wallpaper_set":     "awww img -o {display} {wallpaper}"
     }
 }
 ```
