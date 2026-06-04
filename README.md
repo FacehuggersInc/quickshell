@@ -1,208 +1,149 @@
-# Quickshell Setup — Arch Linux / Hyprland
+# Quickshell — Arch Linux / Hyprland
 
-Everything required to run this Quickshell configuration.
-
----
-
-## System Dependencies
-
-### Core Shell
-```bash
-sudo pacman -S quickshell qt6-base qt6-declarative qt6-wayland
-```
-
-### Hyprland & Wayland
-```bash
-sudo pacman -S hyprland xdg-desktop-portal-hyprland
-```
-
-### Wallpaper — swww
-```bash
-sudo pacman -S swww
-```
-Start the daemon before Quickshell launches:
-```bash
-swww-daemon &
-```
-Your `config.json` `setWallpaperCommand` should look something like:
-```
-swww img {wallpaper} --outputs {display} --transition-type fade
-```
-
-### Notifications
-```bash
-sudo pacman -S libnotify
-```
-
-### Audio
-```bash
-sudo pacman -S pipewire wireplumber
-sudo pacman -S alsa-utils        # provides amixer for volume control
-sudo pacman -S playerctl         # media play/pause/skip controls
-```
-
-### Bluetooth
-```bash
-sudo pacman -S bluez bluez-utils bluez-plugins
-sudo systemctl enable --now bluetooth
-```
-Enable battery level reporting — add to `/etc/bluetooth/main.conf` under `[General]`:
-```ini
-Experimental=true
-```
-Then restart:
-```bash
-sudo systemctl restart bluetooth
-```
-
-### Display Brightness (DDC/CI over I2C)
-```bash
-sudo pacman -S ddcutil
-sudo usermod -aG i2c $USER
-```
-Create `/etc/modules-load.d/i2c.conf` with:
-```
-i2c-dev
-```
-Then reboot or run:
-```bash
-sudo modprobe i2c-dev
-```
-Verify your monitors are detected:
-```bash
-ddcutil detect
-```
-
-### USB Automounting
-```bash
-sudo pacman -S udisks2
-sudo systemctl enable --now udisks2
-```
-
-### Network
-```bash
-sudo pacman -S networkmanager
-sudo systemctl enable --now NetworkManager
-```
-
-### File Manager
-```bash
-sudo pacman -S nautilus
-```
-
-### Terminal
-```bash
-sudo pacman -S ghostty
-```
-
-### Screenshot
-```bash
-sudo pacman -S flameshot
-```
-
-### Color Picker
-```bash
-sudo pacman -S hyprpicker
-```
-
-### Media / MPRIS
-```bash
-sudo pacman -S qt6-tools   # provides qdbus for MPRIS metadata
-```
-
-### VS Code (for opening configs from the settings panel)
-```bash
-sudo pacman -S code
-# or from AUR if you want the proprietary version:
-# yay -S visual-studio-code-bin
-```
+A Hyprland desktop shell built with Quickshell.
 
 ---
 
-## Python & Script Dependencies
+## Dependencies
 
 ```bash
-sudo pacman -S python
-pip install rapidfuzz colormath --break-system-packages
+sudo pacman -S quickshell hyprland hyprpicker \
+    xdg-desktop-portal-hyprland swww \
+    pipewire wireplumber alsa-utils playerctl \
+    bluez bluez-utils bluez-plugins \
+    ddcutil udisks2 networkmanager \
+    libnotify nautilus ghostty flameshot \
+    qt6-base qt6-declarative qt6-wayland \
+    qt6-tools python
 ```
 
-The `utill.py` script lives at:
-```
-~/.config/quickshell/Scripts/utill.py
+```bash
+pip install rapidfuzz colormath pillow numpy --break-system-packages
 ```
 
 ---
 
 ## User Groups
 
-Your user needs to be in these groups. Run this once then **log out and back in**:
 ```bash
 sudo usermod -aG video storage i2c bluetooth $USER
 ```
 
-Verify:
-```bash
-groups $USER
-```
-You should see `video`, `storage`, `i2c`, and `bluetooth` in the output.
+Log out and back in after.
 
 ---
 
-## Post-Install Verification
-
-Run these after a fresh login to confirm everything is working:
+## Services
 
 ```bash
-bluetoothctl --version     # Bluetooth
-ddcutil detect             # Display brightness
-playerctl --version        # Media controls
-amixer info                # Audio
-udisksctl status           # USB automounting
-udevadm --version          # USB hotplug (part of systemd, always present)
-swww --version             # Wallpaper daemon
-hyprpicker --version       # Color picker
-flameshot --version        # Screenshot
-ghostty --version          # Terminal
+sudo systemctl enable --now bluetooth NetworkManager udisks2
+```
+
+**Bluetooth battery** — add to `/etc/bluetooth/main.conf` under `[General]`:
+```ini
+Experimental=true
+```
+
+**DDC brightness** — create `/etc/modules-load.d/i2c.conf`:
+```
+i2c-dev
+```
+Then reboot or `sudo modprobe i2c-dev`.
+
+---
+
+## Installation
+
+```bash
+git clone https://github.com/FacehuggersInc/quickshell.git ~/.config/quickshell
 ```
 
 ---
 
-## System Tray
+## Configuration
 
-The bar includes a system tray powered by Quickshell's `SystemTray` service. It automatically shows and hides based on whether any tray items are present.
+Edit `~/.config/quickshell/config.json` — required fields:
 
-**Supported interactions:**
-- **Left click** — activates the tray item (e.g. show/hide the app)
-- **Right click** — opens the item's native context menu
-
-**Dependencies** — the tray works out of the box with Quickshell. Apps that register a tray icon via the StatusNotifierItem protocol will appear automatically. Common ones include:
-
+```json
+{
+    "wallpapers": {
+        "displays":   ["DP-1", "HDMI-A-1"],
+        "day":        "/path/to/day/wallpapers",
+        "night":      "/path/to/night/wallpapers"
+    },
+    "iconsPath":  "/path/to/icons/",
+    "fontFamily": "Your Font",
+    "commands": {
+        "terminal":          "ghostty",
+        "terminal_run":      "ghostty -e bash -c",
+        "screenshot":        "flameshot gui",
+        "files":             "nautilus",
+        "files_open":        "nautilus {path}",
+        "colorpicker":       "hyprpicker",
+        "editor":            "code",
+        "config_main":       "code /home/USER/.config/",
+        "config_hypr":       "code /home/USER/.config/hypr/",
+        "config_quickshell": "code /home/USER/.config/quickshell/",
+        "lock":              "loginctl lock-session",
+        "suspend":           "systemctl suspend",
+        "reboot":            "systemctl reboot",
+        "poweroff":          "systemctl poweroff",
+        "logout":            "bash -c command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit",
+        "restart_shell":     "/home/USER/.config/quickshell/Scripts/restart.sh",
+        "hypr_reload":       "hyprctl reload",
+        "wallpaper_set":     "swww img -o {display} {wallpaper}"
+    }
+}
 ```
-flameshot       # shows in tray when running
-blueman-applet  # bluetooth tray (optional alternative to the built-in BT panel)
-nm-applet       # network manager tray (optional)
-udiskie         # USB automount tray (optional)
-```
 
-No extra packages required — `Quickshell.Services.SystemTray` is part of Quickshell itself.
+Replace `USER` with your username.
 
 ---
 
-## Quick Reference — Settings Panel Features
+## Icons
 
-| Feature | Command Used |
-|---|---|
-| Wallpaper | `swww img` |
-| Lock screen | `loginctl lock-session` |
-| Suspend | `systemctl suspend` |
-| Reboot | `systemctl reboot` |
-| Shutdown | `systemctl poweroff` |
-| Hyprland reload | `hyprctl reload` |
-| Color picker | `hyprpicker -a` |
-| Screenshot | `flameshot gui` |
-| File manager | `nautilus` |
-| Terminal | `ghostty` |
-| Brightness | `ddcutil setvcp 10 <value>` |
-| Bluetooth | `bluetoothctl` |
-| Audio | `wpctl` + `amixer` |
-| USB mount | `udisksctl mount` |
+Place all icons in the directory set as `iconsPath`. Required names:
+
+```
+add                 alarm               apps
+audio_adjust        backlight_high      backlight_low
+backlight_off       bluetooth           bluetooth_connected
+bluetooth_disabled  bluetooth_searching brightness
+calendar_add        calendar_edit       calendar_event
+calendar_month      calendar_today      check
+close               copy_content        dark_mode
+delete              download            ethernet
+filter              filter_off          hide
+history             home                light_mode
+lock                masked              masked_add
+media_input         media_output        microphone
+microphone_alert    microphone_mute     music_add
+music_album         music_artist        music_note
+music_note_single   music_off           music_pause
+music_play          music_prev          music_queue
+music_resume        music_skip          notify
+notify_unread       open_app            open_folder
+pin                 refresh             restart
+screenshot          search              settings
+show                stop                sync
+terminal            unpin               upload
+volume_max          volume_med          volume_min
+volume_mute         vpn                 wallpaper
+wifi_max            wifi_med            wifi_min
+wifi_off            wired
+```
+
+All icons are `.png`.
+
+---
+
+## Run
+
+```bash
+quickshell
+```
+
+Or add to `~/.config/hypr/hyprland.conf`:
+```
+exec-once = quickshell
+```
