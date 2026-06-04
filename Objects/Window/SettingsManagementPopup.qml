@@ -105,7 +105,7 @@ PopupWindow {
     // ── Color Picker ─────────────────────────────────────────────────────────
     Process {
         id: colorPickerProc
-        command: ["hyprpicker"]
+        command: root.cmd("colorpicker")
         stdout: StdioCollector {
             onStreamFinished: {
                 var color = this.text.trim()
@@ -537,7 +537,7 @@ PopupWindow {
                     }
                 }
 
-                // Wallpaper mode — 3-state toggle: day / auto / night
+                // Wallpaper mode — sliding track, direct pick
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 10
@@ -549,27 +549,18 @@ PopupWindow {
                         iconSize: 20
                         color: root.settings.theme.primary
                         opacity: root.wallpaperMode === 0 ? 0.45 : 1.0
-                        tooltipText: root.wallpaperMode === 1 ? "Force Day Mode"
-                            : root.wallpaperMode === 2 ? "Force Night Mode"
-                            : "Auto (following schedule)"
-                        onClicked: {
-                            root.wallpaperMode = (root.wallpaperMode + 1) % 3
-                            root.settings.wallpaperMode = root.wallpaperMode
-                            root.saveSettings()
-                            root.nextWallpaper()
-                        }
+                        tooltipText: "Wallpaper Mode"
                     }
 
                     ColumnLayout {
-                        Layout.fillWidth: true
                         spacing: 2
+
                         Text {
                             text: "Wallpaper Mode"
                             color: root.settings.theme.text
                             font.family: root.settings.fontFamily
                             font.weight: 500
                             font.pixelSize: 14
-                            Layout.fillWidth: true
                         }
                         Text {
                             text: root.wallpaperMode === 1 ? "Always day wallpapers"
@@ -582,59 +573,67 @@ PopupWindow {
                         }
                     }
 
-                    // 3-state toggle track
-                    // Position: left=day(1), center=auto(0), right=night(2)
-                    Rectangle {
-                        id: threeStateTrack
-                        width: 66
+                    Item { Layout.fillWidth: true }
+
+                    // Sliding track with 3 clickable zones
+                    Item {
+                        width: 96
                         height: 24
-                        radius: 12
-                        color: root.wallpaperMode === 1
-                            ? "#f5a623"                       // amber for day
-                            : root.wallpaperMode === 2
-                                ? root.settings.theme.primary // themed for night
-                                : Qt.rgba(1, 1, 1, 0.15)      // neutral for auto
 
-                        Behavior on color { ColorAnimation { duration: 150 } }
-
-                        // Three position dots (day · auto · night)
-                        Row {
-                            anchors.centerIn: parent
-                            spacing: 6
-                            Repeater {
-                                model: 3
-                                Rectangle {
-                                    width: 4; height: 4; radius: 2
-                                    color: root.settings.theme.text
-                                    opacity: 0.3
-                                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-                                }
-                            }
+                        // Track background
+                        Rectangle {
+                            id: modeTrack
+                            anchors.fill: parent
+                            radius: 12
+                            color: root.wallpaperMode === 1
+                                ? "#f5a623"
+                                : root.wallpaperMode === 2
+                                    ? root.settings.theme.primary
+                                    : Qt.rgba(1, 1, 1, 0.15)
+                            Behavior on color { ColorAnimation { duration: 150 } }
                         }
 
                         // Sliding thumb
                         Rectangle {
-                            width: 18
+                            id: modeThumb
+                            width: 28
                             height: 18
                             radius: 9
                             color: root.settings.theme.text
                             anchors.verticalCenter: parent.verticalCenter
                             // day=left(1), auto=center(0), night=right(2)
                             x: root.wallpaperMode === 1 ? 3
-                             : root.wallpaperMode === 2 ? threeStateTrack.width - width - 3
-                             : (threeStateTrack.width - width) / 2
-
+                             : root.wallpaperMode === 2 ? parent.width - width - 3
+                             : (parent.width - width) / 2
                             Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.InOutQuad } }
                         }
 
-                        MouseArea {
+                        // Three invisible click zones covering Day / Auto / Night
+                        Row {
                             anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                root.wallpaperMode = (root.wallpaperMode + 1) % 3
-                                root.settings.wallpaperMode = root.wallpaperMode
-                                root.saveSettings()
-                                root.nextWallpaper()
+
+                            Repeater {
+                                model: [
+                                    { mode: 1, tip: "Day"   },
+                                    { mode: 0, tip: "Auto"  },
+                                    { mode: 2, tip: "Night" }
+                                ]
+                                delegate: Item {
+                                    required property var modelData
+                                    width:  modeTrack.width / 3
+                                    height: modeTrack.height
+
+                                    HoverHandler { cursorShape: Qt.PointingHandCursor }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: {
+                                            root.wallpaperMode = modelData.mode
+                                            root.settings.wallpaperMode = modelData.mode
+                                            root.saveSettings()
+                                            root.nextWallpaper()
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -953,13 +952,13 @@ PopupWindow {
                     iconName: "open_folder"
                     label: "File Manager"
                     description: "nautilus"
-                    onClicked: root.execute(["nautilus"])
+                    onClicked: root.execute(root.cmd("files"))
                 }
                 ActionRow {
                     iconName: "terminal"
                     label: "Terminal"
                     description: "ghostty"
-                    onClicked: root.execute(["ghostty"])
+                    onClicked: root.execute(root.cmd("terminal"))
                 }
                 ActionRow {
                     iconName: "copy_content"
@@ -973,7 +972,7 @@ PopupWindow {
                     iconName: "screenshot"
                     label: "Screenshot"
                     description: "flameshot gui"
-                    onClicked: root.execute(["flameshot", "gui"])
+                    onClicked: root.execute(root.cmd("screenshot"))
                 }
 
                 // USB drives — only visible when drives are mounted
@@ -984,7 +983,7 @@ PopupWindow {
                         iconName: "open_folder"
                         label: modelData.label
                         description: modelData.mountpoint
-                        onClicked: root.execute(["nautilus", modelData.mountpoint])
+                        onClicked: root.execute(root.cmd("files_open", {"path": modelData.mountpoint}))
                     }
                 }
 
@@ -999,25 +998,25 @@ PopupWindow {
                     iconName: "settings"
                     label: "Hyprland Config"
                     description: "~/.config/hypr/"
-                    onClicked: root.execute(["code", "/home/fach/.config/hypr/"])
+                    onClicked: root.execute(root.cmd("config_hypr"))
                 }
                 ActionRow {
                     iconName: "settings"
                     label: "Quickshell Config"
                     description: "~/.config/quickshell/"
-                    onClicked: root.execute(["code", "/home/fach/.config/quickshell/"])
+                    onClicked: root.execute(root.cmd("config_quickshell"))
                 }
                 ActionRow {
                     iconName: "open_folder"
                     label: "All Dotfiles"
                     description: "~/.config/"
-                    onClicked: root.execute(["code", "/home/fach/.config/"])
+                    onClicked: root.execute(root.cmd("config_main"))
                 }
                 ActionRow {
                     iconName: "refresh"
                     label: "Reload Hyprland Config"
                     description: "hyprctl reload"
-                    onClicked: root.execute(["hyprctl", "reload"])
+                    onClicked: root.execute(root.cmd("hypr_reload"))
                 }
 
                 // ── HYPRLAND ──────────────────────────────────────
@@ -1059,26 +1058,26 @@ PopupWindow {
                 ActionRow {
                     iconName: "lock"
                     label: "Lock Screen"
-                    description: "hyprshutdown, hyprctl dispatch exit"
-                    onClicked: root.execute(["bash", "-c", "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"])
+                    description: "loginctl lock-session"
+                    onClicked: root.execute(root.cmd("lock"))
                 }
                 ActionRow {
                     iconName: "hide"
                     label: "Suspend"
                     description: "systemctl suspend"
-                    onClicked: root.execute(["systemctl", "suspend"])
+                    onClicked: root.execute(root.cmd("suspend"))
                 }
                 ActionRow {
                     iconName: "restart"
                     label: "Reboot"
                     description: "systemctl reboot"
-                    onClicked: root.execute(["systemctl", "reboot"])
+                    onClicked: root.execute(root.cmd("reboot"))
                 }
                 ActionRow {
                     iconName: "stop"
                     label: "Shutdown"
                     description: "systemctl poweroff"
-                    onClicked: root.execute(["systemctl", "poweroff"])
+                    onClicked: root.execute(root.cmd("poweroff"))
                 }
 
                 // ── DEBUG ─────────────────────────────────────────
@@ -1091,7 +1090,7 @@ PopupWindow {
                     iconName: "restart"
                     label: "Restart Quickshell"
                     description: "detached"
-                    onClicked: root.execute(["/home/fach/.config/quickshell/Scripts/restart.sh"])
+                    onClicked: root.execute(root.cmd("restart_shell"))
                 }
 
                 // bottom breathing room

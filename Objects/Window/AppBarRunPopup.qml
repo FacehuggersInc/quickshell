@@ -20,7 +20,7 @@ PopupPanel {
     function acceptAndRun(execute) {
         var cmd = runField.text.trim()
         if (execute && cmd !== "") {
-            root.execute(["ghostty", "-e", "bash", "-c", cmd])
+            root.execute(root.cmd("terminal_run").concat([cmd]))
             runPopup.launched(cmd)
         }
         runPopup.forceClose()

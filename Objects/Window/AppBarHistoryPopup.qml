@@ -225,7 +225,7 @@ PopupWindow {
 
     function updatePosition(widget) {
         let pos = mainWindow.itemPosition(widget)
-        historyPopup.anchor.rect.x = (pos.x + widget.width / 2) - panelWidth / 2 
+        historyPopup.anchor.rect.x = (pos.x + widget.width / 2) - panelWidth / 2
     }
 
     function forceOpen(widget) {

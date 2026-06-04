@@ -67,6 +67,28 @@ ShellRoot {
         configFile.setText( JSON.stringify( settings, null, 4 ) )
     }
 
+    // cmd() — look up a command by key and split into args array
+    // Supports {placeholder} substitution: root.cmd("files_open", {path: "/foo"})
+    function cmd(key, replacements) {
+        var command = settings.commands[key]
+        if (!command) {
+            console.log("cmd: unknown key '" + key + "'")
+            return []
+        }
+        if (replacements) {
+            for (var k in replacements) {
+                command = command.replace("{" + k + "}", replacements[k])
+            }
+        }
+        return command.split(" ")
+    }
+
+    // cmdExec() — look up and immediately execute
+    function cmdExec(key, replacements) {
+        var args = root.cmd(key, replacements)
+        if (args.length > 0) execute(args)
+    }
+
     function copy(text){
         Quickshell.clipboardText = text
     }
@@ -419,5 +441,6 @@ ShellRoot {
     }
 
     // -- UI OBJECTS
+
     property MainWindow main: MainWindow {}
 }

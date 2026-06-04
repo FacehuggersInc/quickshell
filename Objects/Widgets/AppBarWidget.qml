@@ -909,7 +909,7 @@ RoundedBlock{
             } else if (modelData.action === "open") {
                 var args = contextTarget.command.split(" ")
                 for (var i = 0; i < args.length; i++) {
-                    if (args[i].startsWith("/")) { root.execute(["nautilus", args[i]]); break }
+                    if (args[i].startsWith("/")) { root.execute(root.cmd("files_open", {"path": args[i]})); break }
                 }
             } else if (modelData.action === "close") {
                 closeApp(modelData.index, contextTarget.name)
@@ -1136,7 +1136,7 @@ RoundedBlock{
             id: addAppButton
             iconName: "apps"
             iconSize: 26
-            tooltipText: "App Menu"
+            tooltipText: "Add App"
             color: root.settings.theme.text
             onClicked: addDropdown.toggle(addAppButton)
         }

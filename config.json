@@ -14,19 +14,38 @@
         "interval": 600000,
         "day": "/home/fach/Pictures/Wallpapers/Day/",
         "night": "/home/fach/Pictures/Wallpapers/Night/",
-        "setWallpaperCommand": "awww img -o {display} {wallpaper}",
         "smartCrop": true
+    },
+    "commands": {
+        "terminal": "ghostty",
+        "terminal_run": "ghostty -e bash -c",
+        "screenshot": "flameshot gui",
+        "files": "nautilus",
+        "files_open": "nautilus {path}",
+        "colorpicker": "hyprpicker",
+        "editor": "code",
+        "config_main": "code /home/fach/.config/",
+        "config_hypr": "code /home/fach/.config/hypr/",
+        "config_quickshell": "code /home/fach/.config/quickshell/",
+        "lock": "loginctl lock-session",
+        "suspend": "systemctl suspend",
+        "reboot": "systemctl reboot",
+        "poweroff": "systemctl poweroff",
+        "logout": "bash -c command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit",
+        "restart_shell": "/home/fach/.config/quickshell/Scripts/restart.sh",
+        "hypr_reload": "hyprctl reload",
+        "wallpaper_set": "awww img -o {display} {wallpaper} --transition-type fade"
     },
     "iconsPath": "/home/fach/.local/share/icons/material/",
     "volumePercentageOffset": 0,
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#0b0e10",
-        "surface": "#202223",
-        "primary": "#616160",
-        "secondary": "#4a4b4a",
-        "text": "#dfdcd5"
+        "background": "#100d0e",
+        "surface": "#222222",
+        "primary": "#5b6360",
+        "secondary": "#474c4a",
+        "text": "#c8e2d9"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -153,14 +172,14 @@
             "command": "nautilus",
             "options": [
                 [
+                    "--new-window"
+                ],
+                [
                     "--new-window",
                     "/home/fach/.local/share/icons/material/"
                 ],
                 [
                     "."
-                ],
-                [
-                    "/home/fach/.local/share/icons/material/"
                 ]
             ]
         },
@@ -206,7 +225,11 @@
             "nickname": "",
             "icon": "/usr/share/icons/Papirus/64x64/apps/org.localsend.localsend_app.svg",
             "command": "localsend",
-            "options": []
+            "options": [
+                [
+                    "<defunct>"
+                ]
+            ]
         }
     ],
     "colorHistory": [
@@ -215,5 +238,5 @@
         "#799c56"
     ],
     "forceDarkMode": false,
-    "wallpaperMode": 0
+    "wallpaperMode": 2
 }
