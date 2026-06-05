@@ -425,7 +425,7 @@ ShellRoot {
                     }
 
                     // Smart crop for vertical monitors if setting enabled
-                    var finalWallpaper = wallpaper
+                    var finalWallpaper = wallpaper 
                     if (settings.wallpapers.smartCrop) {
                         var displayName = settings.wallpapers.displays[i]
                         var monRes = root.monitorResolutions[displayName]

@@ -283,7 +283,37 @@ In the example above, right-clicking VS Code shows three entries:
 
 ---
 
-## 9. Icons
+## 9. Pinning Apps
+
+The easiest way to pin an app is to simply open it, then **right-click its icon in the app bar** and select **Pin**. The shell will capture the app's class name, command, and any launch arguments automatically.
+
+> **This is not always accurate.** Some apps launch under a different class name than their executable, spawn child processes with different names, or use wrapper scripts. If a pinned app doesn't launch anything when clicked, or opens under the wrong icon, you may need to manually set the correct `command` in `config.json` or use the **Custom App** form in the Add App menu.
+
+For full control, use the **Add App** button (apps icon, far right of the app bar) which gives you two options:
+- **From Installed Apps** — picks from all `.desktop` files on your system
+- **Custom App** — manually set the class name, command, icon, and options
+
+---
+
+## 10. Masquing
+
+Masquing lets you make one app's windows appear under a different pinned app's icon. This is useful when an app spawns windows under a class name that doesn't match its launcher — for example a game launcher that opens the actual game under a completely different class, or an Electron app that reports a generic class name.
+
+**How to set a masque:**
+1. The app you want to masque **under** must already be pinned
+2. Open the app you want to masque
+3. Right-click its icon in the app bar
+4. Select **Add as Masque...** and choose the pinned app to masque under
+
+From that point on, any window matching that class name will appear under the chosen pin as if it were that app.
+
+To remove a masque, right-click the pinned app and select **Manage Masques** — this lists all masques assigned to that pin and lets you remove them individually.
+
+You can also set a masque upfront when adding a custom app via the **Custom App** form using the **Masque Under** field.
+
+---
+
+## 11. Icons
 
 Icons are hand-picked from [Google Material Icons](https://fonts.google.com/icons) and saved as PNG. They are not always named to match their Material name — some are renamed to fit the context they're used in based on personal preference.
 
@@ -322,7 +352,7 @@ All icons are `.png`.
 
 ---
 
-## 10. Timers & Reactivity
+## 12. Timers & Reactivity
 
 Most polling uses `Timer` components with fixed intervals. These control how quickly the UI reacts to changes — lower means faster updates but more subprocess calls. **If the default intervals feel too slow or too aggressive for your system, change them directly in the file listed.**
 
@@ -346,7 +376,7 @@ Most polling uses `Timer` components with fixed intervals. These control how qui
 
 ---
 
-## 11. First Run
+## 13. First Run
 
 On the first launch the icon cache does not exist yet. `AppBarWidget` will call `--getappicons` which walks your entire icon theme directory to build it — this is a one-time operation and may take a few seconds. Subsequent launches read from the cache and are fast.
 
@@ -354,7 +384,7 @@ The cache is stored at `~/.config/quickshell/.icon-cache`.
 
 ---
 
-## 12. Run
+## 14. Run
 
 ```bash
 quickshell
