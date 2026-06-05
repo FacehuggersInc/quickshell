@@ -142,7 +142,7 @@ If any package is missing the affected features will silently fail or return emp
         "day":        "/path/to/wallpapers/day/",   // required — trailing slash needed
         "night":      "/path/to/wallpapers/night/", // required — trailing slash needed
         "interval":   600000,                        // ms between wallpaper changes
-        "primaryDisplayIndex": 0,                    // index into displays array
+        "primaryDisplayIndex": 0,                    // index into displays array — the wallpaper on this display is treated as the "current wallpaper" for theme generation and color sampling
         "randomWallpaperPerDisplay": true,           // different wallpaper per display
         "smartCrop":  false,                         // auto-crop for vertical monitors
         "cycling":    true,                          // set to false to disable wallpaper cycling entirely
