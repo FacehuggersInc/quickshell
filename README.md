@@ -268,6 +268,8 @@ In the example above, right-clicking VS Code shows three entries:
 
 ## Icons
 
+Icons are hand-picked from [Google Material Icons](https://fonts.google.com/icons) and saved as PNG. They are not always named to match their Material name — some are renamed to fit the context they're used in based on personal preference.
+
 Place all icons in the directory set as `iconsPath`. Required names:
 
 ```
