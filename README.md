@@ -91,7 +91,6 @@ Create `~/.config/quickshell/config.json`. Required keys are marked, all others 
         "config_main":       "code /home/USER/.config/",
         "config_hypr":       "code /home/USER/.config/hypr/",
         "config_quickshell": "code /home/USER/.config/quickshell/",
-        "lock":              "loginctl lock-session",
         "suspend":           "systemctl suspend",
         "reboot":            "systemctl reboot",
         "poweroff":          "systemctl poweroff",

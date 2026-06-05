@@ -27,7 +27,6 @@
         "config_main": "code /home/fach/.config/",
         "config_hypr": "code /home/fach/.config/hypr/",
         "config_quickshell": "code /home/fach/.config/quickshell/",
-        "lock": "loginctl lock-session",
         "suspend": "systemctl suspend",
         "reboot": "systemctl reboot",
         "poweroff": "systemctl poweroff",
@@ -41,11 +40,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#0f0c15",
-        "surface": "#232128",
-        "primary": "#646066",
-        "secondary": "#4d4950",
-        "text": "#e2dadf"
+        "background": "#200404",
+        "surface": "#311c1c",
+        "primary": "#6e5d5b",
+        "secondary": "#594645",
+        "text": "#e0dcd6"
     },
     "launcherflags": {
         "maxOptions": 3,

@@ -1058,8 +1058,8 @@ PopupWindow {
                 ActionRow {
                     iconName: "lock"
                     label: "Lock Screen"
-                    description: "loginctl lock-session"
-                    onClicked: root.execute(root.cmd("lock"))
+                    description: "hyprshutdown / hyprctl exit"
+                    onClicked: root.execute(root.cmd("logout"))
                 }
                 ActionRow {
                     iconName: "hide"
