@@ -350,6 +350,20 @@ ShellRoot {
         id: mediaSystem
     }
 
+    // Temp file cleanup after smart crop wallpaper is set
+    Timer {
+        id: cleanupTimer
+        interval: 3000
+        repeat: false
+        property string tempFile: ""
+        onTriggered: {
+            if (tempFile !== "") {
+                root.execute(["rm", "-f", tempFile])
+                tempFile = ""
+            }
+        }
+    }
+
     // Smart crop process — handles vertical monitor wallpapers
     Process {
         id: smartCropProc

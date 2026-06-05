@@ -45,11 +45,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#0e0e0e",
-        "surface": "#262020",
-        "primary": "#745b5b",
-        "secondary": "#584647",
-        "text": "#ffcccd"
+        "background": "#2a0000",
+        "surface": "#3d140f",
+        "primary": "#815730",
+        "secondary": "#6a4025",
+        "text": "#ffd76d"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -214,6 +214,17 @@
             "options": [
                 [
                     "<defunct>"
+                ]
+            ]
+        },
+        {
+            "name": "org.gnome.Nautilus",
+            "nickname": "",
+            "icon": "/usr/share/icons/hicolor/scalable/apps/org.gnome.Nautilus.svg",
+            "command": "/usr/bin/nautilus",
+            "options": [
+                [
+                    "--new-window"
                 ]
             ]
         }

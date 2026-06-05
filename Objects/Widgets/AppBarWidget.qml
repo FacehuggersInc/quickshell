@@ -1106,7 +1106,9 @@ RoundedBlock{
 
                     Image {
                         id: image
-                        source: iconSource
+                        source: iconSource === "*" || iconSource === ""
+                            ? root.iconSource("open_app")
+                            : iconSource
                         anchors.centerIn: parent
                         width: parent.width * 1.5
                         height: parent.height * 1.5
@@ -1131,7 +1133,7 @@ RoundedBlock{
             }
         }
 
-        // ── Add App button — always at the end ───────────────────
+        // ── Add App button — always at the end ─────────────────── 
         IconButton {
             id: addAppButton
             iconName: "apps"

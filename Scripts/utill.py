@@ -437,8 +437,10 @@ class Utill():
         return_str = ""
         for pid, proc in final:
             match = [i for i in icons if proc['class'] in i]
-            if not match: continue
-            clazz, icon = match[0].split(":", 1)
+            if match:
+                clazz, icon = match[0].split(":", 1)
+            else:
+                icon = "*"  # will use fallback in QML
             return_str += f"{proc['pid']},{proc['class']},{icon},{proc['command']},{proc['workspace']['name']},{proc['title']}|"
 
         return return_str.rstrip("|").strip()
@@ -498,7 +500,13 @@ class Utill():
         cachepath  = ICON_CACHE
 
         if cachepath.exists():
-            with open(cachepath, "r") as f: cache = json.load(f)
+            try:
+                with open(cachepath, "r") as f: cache = json.load(f)
+            except (json.JSONDecodeError, Exception):
+                # Cache is corrupted — delete and rebuild from scratch
+                cachepath.unlink(missing_ok=True)
+                save_cache = True
+                cache = {"apps": {}, "index": self.build_icon_index()}
 
             # Remove requested classes from cache so they get re-resolved
             if clear_cache:
