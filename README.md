@@ -329,22 +329,23 @@ All icons are `.png`.
 
 ## Timers & Reactivity
 
-Most polling in the shell uses `Timer` components with fixed intervals. These control how quickly the UI reacts to changes — lower intervals mean faster updates but more CPU usage from frequent subprocess calls.
+Most polling uses `Timer` components with fixed intervals. These control how quickly the UI reacts to changes — lower means faster updates but more subprocess calls. **If the default intervals feel too slow or too aggressive for your system, change them directly in the file listed.**
 
-Key timers and their defaults:
-
-| Feature | Default | What it polls |
-|---|---|---|
-| Active applications | 2000ms | Running windows and their state |
-| Active workspace | 200ms | Current workspace for the switcher |
-| Workspace list | 2000ms | All workspaces and window counts |
-| Media metadata | 1000ms | Current playing track |
-| Network info | 1500ms | Interface, VPN, upload/download |
-| Bluetooth devices | varies | Device list and connection state |
-| Notifications badge | 500ms | Unread count fallback |
-| USB drives | 3000ms | Mounted USB devices in settings |
-
-These can be adjusted directly in the relevant `.qml` files to suit your preference. Faster intervals feel more responsive but may increase CPU usage noticeably on slower systems.
+| Feature | Default | File | What it polls |
+|---|---|---|---|
+| Wallpaper switching | set via config (`interval` key in ms) | `shell.qml` | Cycles to the next wallpaper — controlled by `setWallpaperInterval()` |
+| USB hotplug | 1500ms | `shell.qml` | Detects USB device changes |
+| Active applications | 1500ms | `shell.qml` | Running windows and their state |
+| Notification popup auto-dismiss | 6000ms | `Objects/Window/NotificationPopup.qml` | Auto-closes toast after this time |
+| Notifications badge | 500ms | `Objects/Widgets/NotificationsWidget.qml` | Unread count fallback |
+| Workspace list | 2000ms | `Objects/Widgets/WorkspaceSwitcherWidget.qml` | All workspaces and window counts |
+| Active workspace | 200ms | `Objects/Widgets/WorkspaceSwitcherWidget.qml` | Current workspace highlight |
+| Network info | 1500ms | `Objects/Window/NetworkPopup.qml` | Interface, VPN, upload/download (only while popup is open) |
+| Media metadata | 300ms | `Objects/Window/AudioManagementPopup.qml` | Currently playing track (only while popup is open) |
+| Bluetooth device list | 3000ms | `Objects/Window/BluetoothPopup.qml` | Paired devices and connection state |
+| Bluetooth scan timeout | 12000ms | `Objects/Window/BluetoothPopup.qml` | Stops scanning after this duration |
+| USB drives in settings | 3000ms | `Objects/Window/SettingsManagementPopup.qml` | Mounted USB devices (only while popup is open) |
+| Brightness debounce | 350ms | `Objects/Window/SettingsManagementPopup.qml` | Delay before sending DDC command after slider release |
 
 ---
 
