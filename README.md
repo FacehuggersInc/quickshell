@@ -23,6 +23,16 @@ pip install rapidfuzz colormath pillow numpy --break-system-packages
 
 ---
 
+> **Install order matters:**
+> 1. Install system packages via `pacman` first
+> 2. Enable services before adding user to groups
+> 3. Add user to groups and **log out/in** before running anything that needs them (DDC, bluetooth, USB)
+> 4. Install Python packages after Python is installed
+> 5. `awww` daemon must be running before Quickshell starts — add `exec-once = awww-daemon` to your Hyprland config
+> 6. Reboot after adding `i2c-dev` to modules — `modprobe` is a temporary fix until reboot
+
+---
+
 ## User Groups
 
 ```bash
@@ -98,6 +108,16 @@ Create `~/.config/quickshell/config.json`. Required keys are marked, all others 
         "restart_shell":     "/home/USER/.config/quickshell/Scripts/restart.sh",
         "hypr_reload":       "hyprctl reload"
     },
+```
+
+> **`{placeholder}` substitution** — any command containing `{placeholder}` has that token replaced at runtime before the command is executed:
+> - `{display}` — replaced with the connector name e.g. `DP-1`
+> - `{wallpaper}` — replaced with the full path to the wallpaper file
+> - `{path}` — replaced with a file or folder path (used by `files_open`)
+>
+> You can use these in any command value. Custom placeholders are also supported — add `{anything}` to a command string and pass the value when calling `root.cmd("key", {"anything": "value"})` from QML.
+
+```json
     "iconsPath":  "/path/to/icons/",                 // required
     "fontFamily": "JetBrainsMono",                   // required
     "theme": {
