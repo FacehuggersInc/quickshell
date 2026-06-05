@@ -342,7 +342,8 @@ Most polling uses `Timer` components with fixed intervals. These control how qui
 | Workspace list | 2000ms | `Objects/Widgets/WorkspaceSwitcherWidget.qml` | All workspaces and window counts |
 | Active workspace | 200ms | `Objects/Widgets/WorkspaceSwitcherWidget.qml` | Current workspace highlight |
 | Network info | 1500ms | `Objects/Window/NetworkPopup.qml` | Interface, VPN, upload/download (only while popup is open) |
-| Media metadata | 300ms | `Objects/Window/AudioManagementPopup.qml` | Currently playing track (only while popup is open) |
+| Media metadata | 1000ms | `Objects/Systems/MediaSystem.qml` | Currently playing track, artist, album, status — always polling |
+| Media display refresh | 300ms | `Objects/Window/AudioManagementPopup.qml` | Updates the now-playing display in the audio popup (only while popup is open) |
 | Bluetooth device list | 3000ms | `Objects/Window/BluetoothPopup.qml` | Paired devices and connection state |
 | Bluetooth scan timeout | 12000ms | `Objects/Window/BluetoothPopup.qml` | Stops scanning after this duration |
 | USB drives in settings | 3000ms | `Objects/Window/SettingsManagementPopup.qml` | Mounted USB devices (only while popup is open) |
