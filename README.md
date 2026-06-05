@@ -128,7 +128,6 @@ Create `~/.config/quickshell/config.json`. Required keys are marked, all others 
         "text":       "#e7d9df"                      // required
     },
     "wallpaperMode":          0,    // 0=auto, 1=force day, 2=force night
-    "forceDarkMode":          false,
     "volumePercentageOffset": 0,
     "colorHistory":           [],
     "launcherflags": {
