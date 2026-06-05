@@ -6,7 +6,7 @@ A Hyprland desktop shell built with Quickshell. Requires a **Wayland session** �
 
 ## 1. Dependencies
 
-Install only what applies to your setup — you do not need to run all of these.
+**All of the following are required to use this config as-is.** If you want to skip any group you will need to remove or replace the relevant commands in `config.json` under `commands`, or edit the QML source directly for anything hardcoded.
 
 **Core — required to run the shell:**
 ```bash
