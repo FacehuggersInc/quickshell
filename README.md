@@ -223,7 +223,7 @@ If any package is missing the affected features will silently fail or return emp
 
 Launchers are pinned apps in the app bar. Each launcher maps a window class name to a launch command.
 
-> **`name` is the app or package class name** — this is the class name the application registers with the window system (e.g. `code`, `brave-browser`, `org.gnome.Nautilus`). Hyprland uses this as the window class. The shell uses it to match running windows to their pin. Without a `nickname`, `name` is also what gets displayed in the bar.
+> **`name` is the app or package class name** — this is the class name the application registers with the window system (e.g. `code`, `brave-browser`, `org.gnome.Nautilus`). All launcher management — window matching, active state, instance tracking, options, masques — is handled entirely by `AppBarWidget`. Without a `nickname`, `name` is also what gets displayed in the bar.
 
 ```json
 "launchers": [
@@ -252,7 +252,7 @@ In the example above, right-clicking VS Code shows three entries:
 
 | Field | Required | Description |
 |---|---|---|
-| `name` | ✔ | The app or package class name (e.g. `code`, `org.gnome.Nautilus`, `com.discordapp.Discord`). Used for window matching and as the display name if no `nickname` is set |
+| `name` | ✔ | The app or package class name (e.g. `code`, `org.gnome.Nautilus`, `com.discordapp.Discord`). `AppBarWidget` uses this to match running windows, track instances, and manage state. Doubles as display name if no `nickname` is set |
 | `command` | ✔ | Launch command |
 | `icon` | ✔ | Path to icon file |
 | `nickname` | — | Display name shown in the bar. Defaults to `name` if omitted |
