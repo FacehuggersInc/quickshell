@@ -334,8 +334,9 @@ Most polling uses `Timer` components with fixed intervals. These control how qui
 | Feature | Default | File | What it polls |
 |---|---|---|---|
 | Wallpaper switching | set via config (`interval` key in ms) | `shell.qml` | Cycles to the next wallpaper — controlled by `setWallpaperInterval()` |
-| USB hotplug | 1500ms | `shell.qml` | Detects USB device changes |
-| Active applications | 1500ms | `shell.qml` | Running windows and their state |
+| USB hotplug retry | 1500ms | `shell.qml` | Delay before retrying a USB mount check after a hotplug event |
+| Active applications (initial) | 10ms | `Objects/Widgets/AppBarWidget.qml` | Fires immediately on startup to build the static app list, then slows down |
+| Active applications (polling) | 650ms | `Objects/Widgets/AppBarWidget.qml` | Running windows, active state, instance counts — handled entirely by `AppBarWidget` |
 | Notification popup auto-dismiss | 6000ms | `Objects/Window/NotificationPopup.qml` | Auto-closes toast after this time |
 | Notifications badge | 500ms | `Objects/Widgets/NotificationsWidget.qml` | Unread count fallback |
 | Workspace list | 2000ms | `Objects/Widgets/WorkspaceSwitcherWidget.qml` | All workspaces and window counts |
