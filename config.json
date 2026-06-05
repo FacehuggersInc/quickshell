@@ -41,10 +41,10 @@
     "theme": {
         "mode": "dark",
         "background": "#0f0c15",
-        "surface": "#232128",
-        "primary": "#646066",
-        "secondary": "#4d4950",
-        "text": "#e2dadf"
+        "surface": "#23202a",
+        "primary": "#665e73",
+        "secondary": "#4f4859",
+        "text": "#e8d5ff"
     },
     "launcherflags": {
         "maxOptions": 3,

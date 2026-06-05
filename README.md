@@ -223,6 +223,8 @@ If any package is missing the affected features will silently fail or return emp
 
 Launchers are pinned apps in the app bar. Each launcher maps a window class name to a launch command.
 
+> **`name` is the app or package class name** — this is the class name the application registers with the window system (e.g. `code`, `brave-browser`, `org.gnome.Nautilus`). Hyprland uses this as the window class. The shell uses it to match running windows to their pin. Without a `nickname`, `name` is also what gets displayed in the bar.
+
 ```json
 "launchers": [
     {
@@ -246,13 +248,16 @@ In the example above, right-clicking VS Code shows three entries:
 - `code /home/user/project-b`
 - `code --new-window`
 
-**Optional launcher fields:**
+**Launcher fields:**
 
-| Field | Description |
-|---|---|
-| `nickname` | Display name shown in the bar instead of `name` |
-| `options` | List of argument sets for the right-click jump list |
-| `masque` | Makes another app's windows appear under this pin — `{ "classIncludes": "Electron" }` or `{ "cmdIncludes": "some-process" }` |
+| Field | Required | Description |
+|---|---|---|
+| `name` | ✔ | The app or package class name (e.g. `code`, `org.gnome.Nautilus`, `com.discordapp.Discord`). Used for window matching and as the display name if no `nickname` is set |
+| `command` | ✔ | Launch command |
+| `icon` | ✔ | Path to icon file |
+| `nickname` | — | Display name shown in the bar. Defaults to `name` if omitted |
+| `options` | — | List of argument sets for the right-click jump list |
+| `masque` | — | Makes another app's windows appear under this pin — `{ "classIncludes": "Electron" }` or `{ "cmdIncludes": "some-process" }` |
 
 **`launcherflags` controls per-launcher behaviour:**
 
@@ -262,6 +267,8 @@ In the example above, right-clicking VS Code shows three entries:
 | `ignoreOptions` | Class names that never show or save options at all |
 | `filters` | Args to strip when capturing options — e.g. `{ "org.gnome.Nautilus": ["--gapplication-service"] }` |
 | `maxOptions` | Max number of options stored per launcher |
+
+> **Finding the class name** — most native apps use their binary name (e.g. `code`, `ghostty`). Flatpak apps use their full app ID (e.g. `com.discordapp.Discord`). You can confirm it by running `hyprctl clients` while the app is open and checking the `class:` field, or by checking the app's `.desktop` file for `StartupWMClass`.
 
 
 ---
