@@ -79,7 +79,46 @@ This controls where the script looks for your config, icon cache, and icon direc
 
 ---
 
-## 5. Python Utility (`utill.py`)
+## 5. Icons
+
+Icons are hand-picked from [Google Material Icons](https://fonts.google.com/icons) and saved as PNG. They are not always named to match their Material name — some are renamed to fit the context they're used in based on personal preference.
+
+Place all icons in the directory set as `iconsPath`. The path must end with a trailing `/`. Required names:
+
+```
+add                 alarm               apps
+audio_adjust        backlight_high      backlight_low
+backlight_off       bluetooth           bluetooth_connected
+bluetooth_disabled  bluetooth_searching brightness
+calendar_add        calendar_edit       calendar_event
+calendar_month      calendar_today      check
+close               copy_content        dark_mode
+delete              download            ethernet
+filter              filter_off          hide
+history             home                light_mode
+lock                masked              masked_add
+media_input         media_output        microphone
+microphone_alert    microphone_mute     music_add
+music_album         music_artist        music_note
+music_note_single   music_off           music_pause
+music_play          music_prev          music_queue
+music_resume        music_skip          notify
+notify_unread       open_app            open_folder
+pin                 refresh             restart
+screenshot          search              settings
+show                stop                sync
+terminal            unpin               upload
+volume_max          volume_med          volume_min
+volume_mute         vpn                 wallpaper
+wifi_max            wifi_med            wifi_min
+wifi_off            wired
+```
+
+All icons are `.png`.
+
+---
+
+## 6. Python Utility (`utill.py`)
 
 The shell depends heavily on `Scripts/utill.py`. Almost every background operation — from fetching active windows to setting brightness to picking wallpapers — calls this file via a subprocess. It is **not optional**.
 
@@ -131,7 +170,7 @@ If any package is missing the affected features will silently fail or return emp
 
 ---
 
-## 6. Configuration
+## 7. Configuration
 
 `config.json` does not exist by default — create it at `~/.config/quickshell/config.json`. Required keys are marked, all others are optional.
 
@@ -218,7 +257,7 @@ Replace `USER` with your username and all paths with your actual locations.
 
 ---
 
-## 7. Theme
+## 8. Theme
 
 Theme colors are set manually in `config.json` under the `theme` key. If you want to generate a theme from seed colors, `utill.py` includes a `--generatetheme` function that builds a full theme from a set of hex colors:
 
@@ -230,7 +269,7 @@ Setting `"autoTheme": true` in `wallpapers` enables automatic theme generation �
 
 ---
 
-## 8. Launchers & Options
+## 9. Launchers & Options
 
 Launchers are pinned apps in the app bar. Each launcher maps a window class name to a launch command. All launcher management — window matching, active state, instance tracking, options, masques — is handled entirely by `AppBarWidget`.
 
@@ -283,7 +322,7 @@ In the example above, right-clicking VS Code shows three entries:
 
 ---
 
-## 9. Pinning Apps
+## 10. Pinning Apps
 
 The easiest way to pin an app is to simply open it, then **right-click its icon in the app bar** and select **Pin**. The shell will capture the app's class name, command, and any launch arguments automatically.
 
@@ -295,7 +334,7 @@ For full control, use the **Add App** button (apps icon, far right of the app ba
 
 ---
 
-## 10. Masquing
+## 11. Masquing
 
 Masquing lets you make one app's windows appear under a different pinned app's icon. This is useful when an app spawns windows under a class name that doesn't match its launcher — for example a game launcher that opens the actual game under a completely different class, or an Electron app that reports a generic class name.
 
@@ -310,45 +349,6 @@ From that point on, any window matching that class name will appear under the ch
 To remove a masque, right-click the pinned app and select **Manage Masques** — this lists all masques assigned to that pin and lets you remove them individually.
 
 You can also set a masque upfront when adding a custom app via the **Custom App** form using the **Masque Under** field.
-
----
-
-## 11. Icons
-
-Icons are hand-picked from [Google Material Icons](https://fonts.google.com/icons) and saved as PNG. They are not always named to match their Material name — some are renamed to fit the context they're used in based on personal preference.
-
-Place all icons in the directory set as `iconsPath`. The path must end with a trailing `/`. Required names:
-
-```
-add                 alarm               apps
-audio_adjust        backlight_high      backlight_low
-backlight_off       bluetooth           bluetooth_connected
-bluetooth_disabled  bluetooth_searching brightness
-calendar_add        calendar_edit       calendar_event
-calendar_month      calendar_today      check
-close               copy_content        dark_mode
-delete              download            ethernet
-filter              filter_off          hide
-history             home                light_mode
-lock                masked              masked_add
-media_input         media_output        microphone
-microphone_alert    microphone_mute     music_add
-music_album         music_artist        music_note
-music_note_single   music_off           music_pause
-music_play          music_prev          music_queue
-music_resume        music_skip          notify
-notify_unread       open_app            open_folder
-pin                 refresh             restart
-screenshot          search              settings
-show                stop                sync
-terminal            unpin               upload
-volume_max          volume_med          volume_min
-volume_mute         vpn                 wallpaper
-wifi_max            wifi_med            wifi_min
-wifi_off            wired
-```
-
-All icons are `.png`.
 
 ---
 
