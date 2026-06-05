@@ -145,6 +145,61 @@ Replace `USER` with your username and all paths with your actual locations.
 
 ---
 
+## Python Utility (`utill.py`)
+
+The shell depends heavily on `Scripts/utill.py`. Almost every background operation — from fetching active windows to setting brightness to picking wallpapers — calls this file via a subprocess. It is **not optional**.
+
+The file is called by Quickshell like this:
+
+```bash
+python3 ~/.config/quickshell/Scripts/utill.py --functionname arg1 arg2
+```
+
+Most of these calls happen invisibly in the background. The following functions are in active use by the shell:
+
+| Function | Purpose |
+|---|---|
+| `--getactiveapplications` | Fetch running windows and their metadata from Hyprland |
+| `--getappicons` | Fuzzy-match app class names to icon files |
+| `--getdesktopapps` | Parse `.desktop` files for the Add App window |
+| `--getnetworkinfo` | Network interface, type, VPN and speed |
+| `--getaudiodevices` | List audio input/output devices via wpctl |
+| `--getcommandhistory` | Read shell history (bash/zsh/fish), filtered |
+| `--randomfile` | Pick random wallpaper(s) from a folder |
+| `--smartcrop` | Saliency-crop wallpapers for vertical monitors |
+| `--getmonitorres` | Get monitor resolutions with transform awareness |
+| `--ddcdetect` | Detect DDC-capable displays |
+| `--ddcgetbrightness` | Read current brightness from each display |
+| `--ddcsetbrightness` | Set brightness on a specific display |
+| `--btstate` | Bluetooth adapter state |
+| `--btdevices` | List paired devices with battery and connection status |
+| `--btscan` | Start/stop scanning for nearby devices |
+| `--btscanresults` | List unpaired discovered devices |
+| `--btconnect` | Connect to a device by MAC |
+| `--btdisconnect` | Disconnect a device |
+| `--btpair` | Pair and trust a new device |
+| `--btforget` | Remove a paired device |
+| `--btpower` | Toggle or set adapter power |
+| `--addcolor` | Save a picked color to history in config.json |
+| `--getcolors` | Read color history |
+| `--clearcolors` | Clear color history |
+| `--usbmountcheck` | Check if a USB device is mounted, mount if not |
+| `--generatetheme` | Build a color theme from a set of seed colors |
+
+**Python packages required** by this file:
+
+```bash
+pip install rapidfuzz colormath pillow numpy --break-system-packages
+```
+
+- `rapidfuzz` — fuzzy icon matching
+- `pillow` + `numpy` — smart crop saliency detection
+- `colormath` — theme generation
+
+If any package is missing the affected features will silently fail or return empty results.
+
+---
+
 ## Launchers & Options
 
 Launchers are pinned apps in the app bar. Each launcher maps a window class name to a launch command.
