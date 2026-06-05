@@ -6,17 +6,60 @@ A Hyprland desktop shell built with Quickshell. Requires a **Wayland session** �
 
 ## 1. Dependencies
 
+Install only what applies to your setup — you do not need to run all of these.
+
+**Core — required to run the shell:**
 ```bash
-sudo pacman -S quickshell hyprland hyprpicker awww \
-    xdg-desktop-portal-hyprland \
-    pipewire wireplumber alsa-utils playerctl \
-    bluez bluez-utils bluez-plugins \
-    ddcutil udisks2 networkmanager \
-    libnotify nautilus ghostty flameshot \
-    qt6-base qt6-declarative qt6-wayland \
-    qt6-tools python
+sudo pacman -S quickshell python \
+    qt6-base qt6-declarative qt6-wayland qt6-tools
 ```
 
+**Wallpaper — required for wallpaper cycling:**
+```bash
+sudo pacman -S awww
+```
+
+**Audio — required for volume, media controls, and the audio popup:**
+```bash
+sudo pacman -S pipewire wireplumber alsa-utils playerctl
+```
+
+**Bluetooth — required for the bluetooth popup:**
+```bash
+sudo pacman -S bluez bluez-utils bluez-plugins
+```
+
+**Display brightness — required for DDC brightness sliders:**
+```bash
+sudo pacman -S ddcutil
+```
+
+**USB automounting — required for USB quick access:**
+```bash
+sudo pacman -S udisks2
+```
+
+**Network — required for the network widget:**
+```bash
+sudo pacman -S networkmanager
+```
+
+**Notifications — required for toast popups:**
+```bash
+sudo pacman -S libnotify
+```
+
+**Apps used by default commands** — these match the defaults in `config.json` but can be swapped for alternatives:
+```bash
+sudo pacman -S nautilus ghostty flameshot hyprpicker
+```
+
+**Wayland/Hyprland integration:**
+```bash
+sudo pacman -S hyprland xdg-desktop-portal-hyprland
+```
+
+**Python packages — required for background operations:**
 ```bash
 pip install rapidfuzz colormath pillow numpy --break-system-packages
 ```
@@ -254,8 +297,6 @@ Replace `USER` with your username and all paths with your actual locations.
 > - `notify-send` — desktop notifications
 > - `kill {pid}` — force-closing apps
 > - `rm -f` — cleaning up smart crop temp files
->
-> Feel free to look around files and change how it works to better fit your system.
 
 ---
 
