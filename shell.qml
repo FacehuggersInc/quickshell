@@ -67,20 +67,57 @@ ShellRoot {
         configFile.setText( JSON.stringify( settings, null, 4 ) )
     }
 
-    // cmd() — look up a command by key and split into args array
-    // Supports {placeholder} substitution: root.cmd("files_open", {path: "/foo"})
+    // cmd() — look up a command by key and return as args array
+    // Supports:
+    //   {placeholder}   — replaced by value in replacements object
+    //   {v-varname}     — replaced by value in settings.variables
+    // Shell pipelines (bash -c "...") are handled by wrapping in bash -c automatically
     function cmd(key, replacements) {
         var command = settings.commands[key]
         if (!command) {
             console.log("cmd: unknown key '" + key + "'")
             return []
         }
+
+        // 1. Substitute {v-varname} from settings.variables
+        var vars = settings.variables || {}
+        command = command.replace(/\{v-([^}]+)\}/g, function(match, varname) {
+            return vars[varname] !== undefined ? vars[varname] : match
+        })
+
+        // 2. Substitute {placeholder} from caller replacements
         if (replacements) {
             for (var k in replacements) {
                 command = command.replace("{" + k + "}", replacements[k])
             }
         }
-        return command.split(" ")
+
+        // 3. Smart split — if command contains shell operators (&&, ||, |, ;, >)
+        //    wrap in bash -c "..." so the shell can evaluate them
+        var shellOps = /&&|\|\||[|;&>]/
+        if (shellOps.test(command)) {
+            return ["bash", "-c", command]
+        }
+
+        // 4. Split respecting single and double quoted strings
+        var args = []
+        var current = ""
+        var inSingle = false
+        var inDouble = false
+        for (var i = 0; i < command.length; i++) {
+            var c = command[i]
+            if (c === "'" && !inDouble) {
+                inSingle = !inSingle
+            } else if (c === '"' && !inSingle) {
+                inDouble = !inDouble
+            } else if (c === " " && !inSingle && !inDouble) {
+                if (current.length > 0) { args.push(current); current = "" }
+            } else {
+                current += c
+            }
+        }
+        if (current.length > 0) args.push(current)
+        return args
     }
 
     // cmdExec() — look up and immediately execute
@@ -425,7 +462,7 @@ ShellRoot {
                     }
 
                     // Smart crop for vertical monitors if setting enabled
-                    var finalWallpaper = wallpaper 
+                    var finalWallpaper = wallpaper
                     if (settings.wallpapers.smartCrop) {
                         var displayName = settings.wallpapers.displays[i]
                         var monRes = root.monitorResolutions[displayName]

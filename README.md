@@ -262,6 +262,7 @@ If any package is missing the affected features will silently fail or return emp
         "secondary":  "#55474c",
         "text":       "#e7d9df"                      // required
     },
+    "variables": {},               // optional — referenced in commands as {v-key}
     "wallpaperMode":          0,    // 0=auto, 1=force day, 2=force night
     "volumePercentageOffset": 0,
     "colorHistory":           [],
@@ -277,6 +278,26 @@ If any package is missing the affected features will silently fail or return emp
 ```
 
 Replace `USER` with your username and all paths with your actual locations.
+
+**`variables`** — optional key/value pairs you can reference in any command using `{v-varname}`:
+
+```json
+"variables": {
+    "user":        "fach",
+    "config":      "/home/fach/.config",
+    "scripts":     "/home/fach/.config/quickshell/Scripts",
+    "wallpapers":  "/home/fach/Pictures/Wallpapers"
+}
+```
+
+Then in `commands`:
+```json
+"config_hypr":       "code {v-config}/hypr/",
+"config_quickshell": "code {v-config}/quickshell/",
+"restart_shell":     "{v-scripts}/restart.sh"
+```
+
+Any `{v-key}` that doesn't match a key in `variables` is left as-is.
 
 > **`{placeholder}` substitution** — any command containing `{placeholder}` has that token replaced at runtime before the command is executed:
 > - `{display}` — replaced with the connector name e.g. `DP-1`

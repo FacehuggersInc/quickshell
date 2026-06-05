@@ -18,12 +18,15 @@
         "night": "/home/fach/Pictures/Wallpapers/Night/",
         "smartCrop": true
     },
+    "variables": {
+        "sigma-manager": "/home/fach/Applications/Sigma-File-Manager-2.1.0-linux_49147f5ef3eb6eba15a35e71afddb9ac.AppImage"
+    },
     "commands": {
         "terminal": "ghostty",
         "terminal_run": "ghostty -e bash -c",
         "screenshot": "flameshot gui",
-        "files": "nautilus",
-        "files_open": "nautilus {path}",
+        "files": "{v-sigma-manager}",
+        "files_open": "{v-sigma-manager} {path}",
         "colorpicker": "hyprpicker",
         "editor": "code",
         "config_main": "code /home/fach/.config/",
@@ -42,11 +45,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#1e0608",
-        "surface": "#301c1d",
-        "primary": "#715c59",
-        "secondary": "#5a4644",
-        "text": "#ecd8cc"
+        "background": "#0d0e0e",
+        "surface": "#24211d",
+        "primary": "#6c5f4b",
+        "secondary": "#52493b",
+        "text": "#f8d7a3"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -239,5 +242,5 @@
         "#799c56"
     ],
     "forceDarkMode": false,
-    "wallpaperMode": 2
+    "wallpaperMode": 0
 }
