@@ -254,6 +254,7 @@ Replace `USER` with your username and all paths with your actual locations.
 > - `notify-send` — desktop notifications
 > - `kill {pid}` — force-closing apps
 > - `rm -f` — cleaning up smart crop temp files
+> Feel free to look around files and change how it works to better fit your system.
 
 ---
 
