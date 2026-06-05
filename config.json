@@ -19,14 +19,14 @@
         "smartCrop": true
     },
     "variables": {
-        "sigma-manager": "/home/fach/Applications/Sigma-File-Manager-2.1.0-linux_49147f5ef3eb6eba15a35e71afddb9ac.AppImage"
+        "sigma-manager": "?"
     },
     "commands": {
         "terminal": "ghostty",
         "terminal_run": "ghostty -e bash -c",
         "screenshot": "flameshot gui",
-        "files": "{v-sigma-manager}",
-        "files_open": "{v-sigma-manager} {path}",
+        "files": "nautilus",
+        "files_open": "nautilus {path}",
         "colorpicker": "hyprpicker",
         "editor": "code",
         "config_main": "code /home/fach/.config/",
@@ -45,11 +45,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#240300",
-        "surface": "#341b0f",
-        "primary": "#705d54",
-        "secondary": "#5c463c",
-        "text": "#dcdcdc"
+        "background": "#0e0e0e",
+        "surface": "#262020",
+        "primary": "#745b5b",
+        "secondary": "#584647",
+        "text": "#ffcccd"
     },
     "launcherflags": {
         "maxOptions": 3,
