@@ -142,6 +142,9 @@ ShellRoot {
     }
 
     function checkDarkHour(){ 
+        // Do nothing if wallpaper cycling is disabled
+        if (!settings.wallpapers.cycling) return
+
         if (!initialDarkHourCheck) {
             wallpaperSwitchTimer.interval = settings.wallpapers.interval
             initialDarkHourCheck = true 
@@ -348,6 +351,11 @@ ShellRoot {
         running: false
         repeat: true
         onTriggered:{
+            // Only generate theme if autoTheme is enabled
+            if (!root.settings.wallpapers.autoTheme) {
+                themeCheckTimer.running = false
+                return
+            }
             if (colorQuan.colors.length > 0){
                 var themeCommand = combine( newUtill(["--generatetheme", "dark"]), root.wallpaperColors.colors )
                 themeGenerator.command = themeCommand
@@ -387,7 +395,7 @@ ShellRoot {
     Timer{
         id: wallpaperSwitchTimer
         interval: 100 //Gets Altered in checkDarkHour
-        running: true
+        running: root.settings.wallpapers.cycling !== false  // default true if key absent
         repeat: true
         onTriggered: checkDarkHour()
     }
@@ -402,7 +410,7 @@ ShellRoot {
                 var wallpapers = this.text.split(",")
                 var rawCommand = (settings.commands && settings.commands.wallpaper_set)
                     || settings.wallpapers.setWallpaperCommand
-                    || "swww img -o {display} {wallpaper}"
+                    || "awww img -o {display} {wallpaper}"
                 var setWallpaperCommand = rawCommand
                 for (var i = 0; i < settings.wallpapers.displays.length; i++) {
                     setWallpaperCommand = rawCommand

@@ -145,6 +145,8 @@ If any package is missing the affected features will silently fail or return emp
         "primaryDisplayIndex": 0,                    // index into displays array
         "randomWallpaperPerDisplay": true,           // different wallpaper per display
         "smartCrop":  false,                         // auto-crop for vertical monitors
+        "cycling":    true,                          // set to false to disable wallpaper cycling entirely
+        "autoTheme":  false,                         // generate theme colors from current wallpaper
         "darkModeHours": {
             "at":     21,                            // hour to switch to night (24h)
             "before": 6                              // hour to switch to day (24h)
@@ -223,6 +225,8 @@ Theme colors are set manually in `config.json` under the `theme` key. If you wan
 ```bash
 python3 ~/.config/quickshell/Scripts/utill.py --generatetheme dark #19090e #6b5d62
 ```
+
+Setting `"autoTheme": true` in `wallpapers` enables automatic theme generation — every time the wallpaper changes, colors are sampled from it and the theme is updated and saved to `config.json` automatically. Disable this if you want to keep a fixed theme.
 
 ---
 

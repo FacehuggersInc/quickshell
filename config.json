@@ -12,6 +12,8 @@
         "primaryDisplayIndex": 1,
         "randomWallpaperPerDisplay": true,
         "interval": 600000,
+        "cycling": true,
+        "autoTheme": true,
         "day": "/home/fach/Pictures/Wallpapers/Day/",
         "night": "/home/fach/Pictures/Wallpapers/Night/",
         "smartCrop": true
@@ -40,11 +42,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#1f0506",
-        "surface": "#301c1d",
-        "primary": "#6d5d5d",
-        "secondary": "#584746",
-        "text": "#dedcd9"
+        "background": "#250009",
+        "surface": "#36181f",
+        "primary": "#715b5f",
+        "secondary": "#5d4448",
+        "text": "#dcdcdc"
     },
     "launcherflags": {
         "maxOptions": 3,
