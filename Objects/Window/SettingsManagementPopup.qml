@@ -951,19 +951,21 @@ PopupWindow {
                 ActionRow {
                     iconName: "open_folder"
                     label: "File Manager"
-                    description: "nautilus"
+                    description: root.cmdDesc("files")
                     onClicked: root.execute(root.cmd("files"))
                 }
                 ActionRow {
                     iconName: "terminal"
                     label: "Terminal"
-                    description: "ghostty"
+                    description: root.cmdDesc("terminal")
                     onClicked: root.execute(root.cmd("terminal"))
                 }
                 ActionRow {
                     iconName: "copy_content"
                     label: "Color Picker"
-                    description: colorPickerProc.running ? "picking..." : "hyprpicker"
+                    description: colorPickerProc.running
+                        ? "picking..."
+                        : root.cmdDesc("colorpicker")
                     onClicked: {
                         if (!colorPickerProc.running) colorPickerProc.running = true
                     }
@@ -971,7 +973,7 @@ PopupWindow {
                 ActionRow {
                     iconName: "screenshot"
                     label: "Screenshot"
-                    description: "flameshot gui"
+                    description: root.cmdDesc("screenshot")
                     onClicked: root.execute(root.cmd("screenshot"))
                 }
 
@@ -997,25 +999,25 @@ PopupWindow {
                 ActionRow {
                     iconName: "settings"
                     label: "Hyprland Config"
-                    description: "~/.config/hypr/"
+                    description: root.cmdDesc("config_hypr")
                     onClicked: root.execute(root.cmd("config_hypr"))
                 }
                 ActionRow {
                     iconName: "settings"
                     label: "Quickshell Config"
-                    description: "~/.config/quickshell/"
+                    description: root.cmdDesc("config_quickshell")
                     onClicked: root.execute(root.cmd("config_quickshell"))
                 }
                 ActionRow {
                     iconName: "open_folder"
                     label: "All Dotfiles"
-                    description: "~/.config/"
+                    description: root.cmdDesc("config_main")
                     onClicked: root.execute(root.cmd("config_main"))
                 }
                 ActionRow {
                     iconName: "refresh"
                     label: "Reload Hyprland Config"
-                    description: "hyprctl reload"
+                    description: root.cmdDesc("hypr_reload")
                     onClicked: root.execute(root.cmd("hypr_reload"))
                 }
 
@@ -1058,25 +1060,25 @@ PopupWindow {
                 ActionRow {
                     iconName: "lock"
                     label: "Lock Screen"
-                    description: "hyprshutdown / hyprctl exit"
+                    description: root.cmdDesc("logout")
                     onClicked: root.execute(root.cmd("logout"))
                 }
                 ActionRow {
                     iconName: "hide"
                     label: "Suspend"
-                    description: "systemctl suspend"
+                    description: root.cmdDesc("suspend")
                     onClicked: root.execute(root.cmd("suspend"))
                 }
                 ActionRow {
                     iconName: "restart"
                     label: "Reboot"
-                    description: "systemctl reboot"
+                    description: root.cmdDesc("reboot")
                     onClicked: root.execute(root.cmd("reboot"))
                 }
                 ActionRow {
                     iconName: "stop"
                     label: "Shutdown"
-                    description: "systemctl poweroff"
+                    description: root.cmdDesc("poweroff")
                     onClicked: root.execute(root.cmd("poweroff"))
                 }
 
@@ -1089,7 +1091,7 @@ PopupWindow {
                 ActionRow {
                     iconName: "restart"
                     label: "Restart Quickshell"
-                    description: "detached"
+                    description: root.cmdDesc("restart_shell")
                     onClicked: root.execute(root.cmd("restart_shell"))
                 }
 

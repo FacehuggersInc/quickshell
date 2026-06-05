@@ -45,11 +45,11 @@
     "fontFamily": "JetBrainsMono",
     "theme": {
         "mode": "dark",
-        "background": "#0d0e0e",
-        "surface": "#24211d",
-        "primary": "#6c5f4b",
-        "secondary": "#52493b",
-        "text": "#f8d7a3"
+        "background": "#240300",
+        "surface": "#341b0f",
+        "primary": "#705d54",
+        "secondary": "#5c463c",
+        "text": "#dcdcdc"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -168,24 +168,6 @@
             "icon": "/usr/share/icons/Papirus/64x64/apps/org.gnome.SystemMonitor.svg",
             "command": "gnome-system-monitor",
             "options": []
-        },
-        {
-            "name": "org.gnome.Nautilus",
-            "nickname": "Files",
-            "icon": "/usr/share/icons/Papirus/64x64/apps/org.gnome.Nautilus.svg",
-            "command": "nautilus",
-            "options": [
-                [
-                    "--new-window"
-                ],
-                [
-                    "--new-window",
-                    "/home/fach/.local/share/icons/material/"
-                ],
-                [
-                    "."
-                ]
-            ]
         },
         {
             "name": "input-remapper-gtk",

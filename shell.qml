@@ -120,6 +120,13 @@ ShellRoot {
         return args
     }
 
+    // cmdDesc() — get a truncated command string for display in UI
+    function cmdDesc(key, maxLen) {
+        var command = settings.commands[key] || ""
+        var limit = maxLen || 32
+        return command.length > limit ? command.substring(0, limit) + "…" : command
+    }
+
     // cmdExec() — look up and immediately execute
     function cmdExec(key, replacements) {
         var args = root.cmd(key, replacements)
