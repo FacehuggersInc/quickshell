@@ -21,6 +21,15 @@ sudo pacman -S quickshell hyprland hyprpicker awww \
 pip install rapidfuzz colormath pillow numpy --break-system-packages
 ```
 
+Then open `~/.config/quickshell/Scripts/utill.py` and set your username at the top of the file:
+
+```python
+# ── USER CONFIGURATION ────────────────────────────
+USERNAME = "youruser"   # change this to your Linux username
+```
+
+This controls where the script looks for your config, icon cache, and icon directories. Everything else derives from it automatically.
+
 ---
 
 > **Install order matters:**
@@ -191,6 +200,15 @@ Most of these calls happen invisibly in the background. The following functions 
 ```bash
 pip install rapidfuzz colormath pillow numpy --break-system-packages
 ```
+
+Then open `~/.config/quickshell/Scripts/utill.py` and set your username at the top of the file:
+
+```python
+# ── USER CONFIGURATION ────────────────────────────
+USERNAME = "youruser"   # change this to your Linux username
+```
+
+This controls where the script looks for your config, icon cache, and icon directories. Everything else derives from it automatically.
 
 - `rapidfuzz` — fuzzy icon matching
 - `pillow` + `numpy` — smart crop saliency detection

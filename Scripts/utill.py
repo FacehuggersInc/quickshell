@@ -8,8 +8,29 @@ from theme import build_theme
 
 INVALID = [(" &", ",")]
 PLAYERS = ["Youtube Music", "Spotify", 'Youtube']
-ICON_ROOTS = ["/usr/share/icons", "/home/fach/.local/share/icons"]
 VALID_EXTS = (".png", ".svg", ".xpm")
+
+# ── USER CONFIGURATION ────────────────────────────────────────────────────────
+# Set these to match your system before running.
+
+# Your Linux username
+USERNAME = "fach"
+
+# Quickshell config directory
+CONFIG_DIR = Path(f"/home/{USERNAME}/.config/quickshell")
+
+# config.json path
+CONFIG_JSON = CONFIG_DIR / "config.json"
+
+# Icon cache file
+ICON_CACHE = CONFIG_DIR / ".icon-cache"
+
+# Icon search roots — add any extra icon theme directories here
+ICON_ROOTS = [
+    "/usr/share/icons",
+    f"/home/{USERNAME}/.local/share/icons",
+]
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 def post(txt: str):
@@ -474,7 +495,7 @@ class Utill():
         results    = []
         cache      = {"apps": {}, "index": []}
         save_cache = False
-        cachepath  = Path("/home/fach/.config/quickshell/.icon-cache")
+        cachepath  = ICON_CACHE
 
         if cachepath.exists():
             with open(cachepath, "r") as f: cache = json.load(f)
@@ -1020,7 +1041,7 @@ class Utill():
         color = args[0].strip().lower()
         if not color.startswith("#"): color = "#" + color
 
-        config_path = Path("/home/fach/.config/quickshell/config.json")
+        config_path = CONFIG_JSON
         try:
             with open(config_path, "r") as f:
                 config = json.load(f)
@@ -1046,7 +1067,7 @@ class Utill():
         """Get color history from config.json.
         Returns comma-separated hex colors.
         """
-        config_path = Path("/home/fach/.config/quickshell/config.json")
+        config_path = CONFIG_JSON
         try:
             with open(config_path, "r") as f:
                 config = json.load(f)
@@ -1057,7 +1078,7 @@ class Utill():
     @argfunc
     def clearcolors(self, *args):
         """Clear color history."""
-        config_path = Path("/home/fach/.config/quickshell/config.json")
+        config_path = CONFIG_JSON
         try:
             with open(config_path, "r") as f:
                 config = json.load(f)
