@@ -100,7 +100,7 @@ Create `~/.config/quickshell/config.json`. Required keys are marked, all others 
     },
     "commands": {
         "terminal":          "ghostty",              // required
-        "terminal_run":      "ghostty -e bash -c",   // required
+        "terminal_run":      "ghostty -e bash -c",   // required — the command to run is appended as an arg
         "wallpaper_set":     "awww img -o {display} {wallpaper}", // required
         "screenshot":        "flameshot gui",
         "files":             "nautilus",
@@ -118,6 +118,21 @@ Create `~/.config/quickshell/config.json`. Required keys are marked, all others 
         "hypr_reload":       "hyprctl reload"
     },
 ```
+
+> **Other commands used internally** — the following are called directly in QML without going through the `commands` map and cannot be overridden from config:
+> - `hyprctl dispatch workspace {n}` — workspace switching
+> - `hyprctl dispatch movetoworkspacesilent` — sending windows between workspaces
+> - `hyprctl keyword` — toggling animations and blur
+> - `wpctl set-volume` / `wpctl set-default` — audio control
+> - `playerctl previous/play-pause/next` — media controls
+> - `bluetoothctl` — all bluetooth operations (via `utill.py`)
+> - `ddcutil` — all brightness operations (via `utill.py`)
+> - `udisksctl mount` — USB mounting (via `utill.py`)
+> - `notify-send` — desktop notifications
+> - `kill {pid}` — force-closing apps
+> - `rm -f` — cleaning up smart crop temp files
+
+---
 
 > **`{placeholder}` substitution** — any command containing `{placeholder}` has that token replaced at runtime before the command is executed:
 > - `{display}` — replaced with the connector name e.g. `DP-1`
@@ -309,6 +324,27 @@ wifi_off            wired
 ```
 
 All icons are `.png`.
+
+---
+
+## Timers & Reactivity
+
+Most polling in the shell uses `Timer` components with fixed intervals. These control how quickly the UI reacts to changes — lower intervals mean faster updates but more CPU usage from frequent subprocess calls.
+
+Key timers and their defaults:
+
+| Feature | Default | What it polls |
+|---|---|---|
+| Active applications | 2000ms | Running windows and their state |
+| Active workspace | 200ms | Current workspace for the switcher |
+| Workspace list | 2000ms | All workspaces and window counts |
+| Media metadata | 1000ms | Current playing track |
+| Network info | 1500ms | Interface, VPN, upload/download |
+| Bluetooth devices | varies | Device list and connection state |
+| Notifications badge | 500ms | Unread count fallback |
+| USB drives | 3000ms | Mounted USB devices in settings |
+
+These can be adjusted directly in the relevant `.qml` files to suit your preference. Faster intervals feel more responsive but may increase CPU usage noticeably on slower systems.
 
 ---
 
