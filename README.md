@@ -168,6 +168,7 @@ Most of these calls happen invisibly in the background. The following functions 
 
 | Function | Purpose |
 |---|---|
+| `--getcurrentplaying` | Current media metadata via MPRIS (title, artist, album, art, source, status) |
 | `--getactiveapplications` | Fetch running windows and their metadata from Hyprland |
 | `--getappicons` | Fuzzy-match app class names to icon files |
 | `--getdesktopapps` | Parse `.desktop` files for the Add App window |
