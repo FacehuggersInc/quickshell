@@ -16,7 +16,8 @@
         "autoTheme": true,
         "day": "/home/fach/Pictures/Wallpapers/Day/",
         "night": "/home/fach/Pictures/Wallpapers/Night/",
-        "smartCrop": true
+        "smartCrop": true,
+        "wallpaperMode": 0
     },
     "variables": {
         "sigma-manager": "?"
