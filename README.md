@@ -87,17 +87,7 @@ pip install rapidfuzz colormath pillow numpy --break-system-packages
 
 ---
 
-## 2. User Groups
-
-```bash
-sudo usermod -aG video storage i2c bluetooth $USER
-```
-
-Log out and back in after.
-
----
-
-## 3. Services
+## 2. Services
 
 ```bash
 sudo systemctl enable --now bluetooth NetworkManager udisks2
@@ -113,6 +103,16 @@ Experimental=true
 i2c-dev
 ```
 Then reboot or `sudo modprobe i2c-dev`.
+
+---
+
+## 3. User Groups
+
+```bash
+sudo usermod -aG video storage i2c bluetooth $USER
+```
+
+Log out and back in after.
 
 ---
 
