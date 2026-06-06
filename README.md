@@ -253,6 +253,10 @@ If you have not yet created `config.json` see [Installation](#4-installation) ab
             "before": 6                          // hour to switch to day (24h)
         }
     },
+    "variables": {
+        "home":    "/home/USER",                 // reference as {v-home} in commands below
+        "editor":  "code"                        // reference as {v-editor} — swap to change editor everywhere
+    },
     "commands": {
         "terminal":          "ghostty",          // required
         "terminal_run":      "ghostty -e bash -c", // required
@@ -261,17 +265,17 @@ If you have not yet created `config.json` see [Installation](#4-installation) ab
         "files":             "nautilus",
         "files_open":        "nautilus {path}",
         "colorpicker":       "hyprpicker",
-        "editor":            "code",
-        "config_json":       "code /home/USER/.config/quickshell/config.json",
-        "config_main":       "code /home/USER/.config/",
-        "config_hypr":       "code /home/USER/.config/hypr/",
-        "config_quickshell": "code /home/USER/.config/quickshell/",
+        "editor":            "{v-editor}",
+        "config_json":       "{v-editor} {v-home}/.config/quickshell/config.json",
+        "config_main":       "{v-editor} {v-home}/.config/",
+        "config_hypr":       "{v-editor} {v-home}/.config/hypr/",
+        "config_quickshell": "{v-editor} {v-home}/.config/quickshell/",
         "lock":              "loginctl lock-session",
         "suspend":           "systemctl suspend",
         "reboot":            "systemctl reboot",
         "poweroff":          "systemctl poweroff",
         "logout":            "bash -c command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit",
-        "restart_shell":     "/home/USER/.config/quickshell/Scripts/restart.sh",
+        "restart_shell":     "{v-home}/.config/quickshell/Scripts/restart.sh",
         "hypr_reload":       "hyprctl reload"
     },
     "iconsPath":       "/path/to/icons/",        // required — trailing slash needed
@@ -284,8 +288,7 @@ If you have not yet created `config.json` see [Installation](#4-installation) ab
         "secondary":  "#55474c",
         "text":       "#e7d9df"                  // required
     },
-    "variables":   {},                           // optional — referenced in commands as {v-key}
-    "forceDarkMode": false,
+
     "colorHistory": [],
     "launcherflags": {
         "maxOptions":    3,

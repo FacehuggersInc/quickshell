@@ -24,16 +24,30 @@ PopupPanel {
         anchors.fill: parent
         spacing: 0
 
-        Text {
-            text: "Masque under:"
-            color: root.settings.theme.text
-            opacity: 0.55
-            font.family: root.settings.fontFamily
-            font.pixelSize: 12
-            font.weight: 600
+        RowLayout {
+            Layout.fillWidth: true
             Layout.leftMargin: 10
+            Layout.rightMargin: 6
             Layout.topMargin: 6
             Layout.bottomMargin: 2
+
+            Text {
+                text: "Masque under:"
+                color: root.settings.theme.text
+                opacity: 0.55
+                font.family: root.settings.fontFamily
+                font.pixelSize: 12
+                font.weight: 600
+                Layout.fillWidth: true
+            }
+
+            IconButton {
+                iconName: "close"
+                iconSize: 14
+                color: root.settings.theme.text
+                tooltipText: "Cancel"
+                onClicked: masquePopup.forceClose()
+            }
         }
 
         Repeater {
