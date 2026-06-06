@@ -187,37 +187,37 @@ The file is called by Quickshell like this:
 python3 ~/.config/quickshell/Scripts/utill.py --functionname arg1 arg2
 ```
 
-Most of these calls happen invisibly in the background. The following functions are in active use by the shell:
+The table below documents what the shell is actually doing in the background. These are not user-facing commands — they run automatically and the results are parsed by the QML layer:
 
-| Function | Purpose |
+| Function | What the shell uses it for |
 |---|---|
-| `--getcurrentplaying` | Current media metadata via MPRIS (title, artist, album, art, source, status) |
-| `--getactiveapplications` | Fetch running windows and their metadata |
-| `--getappicons` | Fuzzy-match app class names to icon files |
-| `--getdesktopapps` | Parse `.desktop` files for the Add App window |
-| `--getnetworkinfo` | Network interface, type, VPN and speed |
-| `--getaudiodevices` | List audio input/output devices via wpctl |
-| `--getcommandhistory` | Read shell history (bash/zsh/fish), filtered |
-| `--randomfile` | Pick random wallpaper(s) from a folder |
-| `--smartcrop` | Saliency-crop wallpapers for vertical monitors |
-| `--getmonitorres` | Get monitor resolutions with transform awareness |
-| `--ddcdetect` | Detect DDC-capable displays |
-| `--ddcgetbrightness` | Read current brightness from each display |
-| `--ddcsetbrightness` | Set brightness on a specific display |
-| `--btstate` | Bluetooth adapter state |
-| `--btdevices` | List paired devices with battery and connection status |
-| `--btscan` | Start/stop scanning for nearby devices |
-| `--btscanresults` | List unpaired discovered devices |
-| `--btconnect` | Connect to a device by MAC |
-| `--btdisconnect` | Disconnect a device |
-| `--btpair` | Pair and trust a new device |
-| `--btforget` | Remove a paired device |
-| `--btpower` | Toggle or set adapter power |
-| `--addcolor` | Save a picked color to history in config.json |
-| `--getcolors` | Read color history |
-| `--clearcolors` | Clear color history |
-| `--usbmountcheck` | Check if a USB device is mounted, mount if not |
-| `--generatetheme` | Build a color theme from a set of seed colors |
+| `--getcurrentplaying` | Polls MPRIS every 300ms when the audio popup is open — returns title, artist, album, art URL, source app and playback status |
+| `--getactiveapplications` | Polls every 650ms to build the app bar — returns all open windows with their class, PID, command, workspace and title |
+| `--getappicons` | Called when an app class name has no cached icon — fuzzy-matches the class name against icon files on disk and caches the result in `.icon-cache` |
+| `--getdesktopapps` | Called once when the "Add App" window opens — parses all `.desktop` files including Flatpak |
+| `--getnetworkinfo` | Polls every 1.5s when the network popup is open — samples `/proc/net/dev` twice 0.5s apart to calculate live speeds |
+| `--getaudiodevices` | Called when the audio popup opens — lists input and output devices via `wpctl status` |
+| `--getcommandhistory` | Called when the Command History popup opens — reads `~/.bash_history`, `~/.zsh_history` and `~/.local/share/fish/fish_history`. **Filters heavily** — strips sudo, package managers, git, file ops, shell builtins and any single-word command. The intent is app launches and custom scripts only. If a command you expect to see is missing it is almost certainly being filtered. Edit `FILTER_PREFIXES` in `utill.py` to loosen this. |
+| `--randomfile` | Called on each wallpaper cycle — picks one random file per display from the configured folder |
+| `--smartcrop` | Called before setting a wallpaper on a vertical monitor — analyses column variance to find the most visually interesting horizontal region and crops to it. Returns the original path unchanged if the image ratio is already close enough or if variance is too uniform |
+| `--getmonitorres` | Called once on startup — reads monitor dimensions and transform from `hyprctl monitors -j` to determine which displays are vertical |
+| `--ddcdetect` | Called when the settings panel opens — lists DDC-capable displays via `ddcutil detect` |
+| `--ddcgetbrightness` | Called when the settings panel opens — reads current brightness for each detected display |
+| `--ddcsetbrightness` | Called on slider release — sets brightness on a specific display number via `ddcutil setvcp 10` |
+| `--btstate` | Polls every 2s in the bluetooth widget — returns adapter power, scanning and discoverable state |
+| `--btdevices` | Polls when the bluetooth popup is open — lists paired devices with alias, connection status and battery percentage |
+| `--btscan` | Called when the scan button is pressed — starts a 10s `bluetoothctl` scan in the background |
+| `--btscanresults` | Polls while scanning — returns discovered devices not already paired |
+| `--btconnect` | Called on connect button press — connects by MAC and sends a `notify-send` notification |
+| `--btdisconnect` | Called on disconnect — disconnects by MAC |
+| `--btpair` | Called on pair button press — trusts, pairs and connects a new device |
+| `--btforget` | Called on forget — removes a device from paired list |
+| `--btpower` | Called on the power toggle — toggles or sets adapter power state |
+| `--addcolor` | Called after `hyprpicker` exits — saves the picked hex color to `colorHistory` in `config.json`, keeps last 10 |
+| `--getcolors` | Called when the color history popup opens |
+| `--clearcolors` | Called on the clear button in the color history popup |
+| `--usbmountcheck` | Called when a USB hotplug event fires — checks if the partition is mounted and mounts it via `udisksctl` if not |
+| `--generatetheme` | Called when `autoTheme` is enabled — builds a full color theme from seed colors extracted from the current wallpaper |
 
 **Python packages required** by this file:
 
@@ -231,18 +231,7 @@ If any package is missing the affected features will silently fail or return emp
 
 ## 7. Configuration
 
-`config.json` does not exist by default — create it at `~/.config/quickshell/config.json`.
-
-**Always required:**
-- `iconsPath`, `fontFamily`, `theme` — core appearance
-- `commands.terminal` and `commands.terminal_run` — used by the run command and command history
-- `displays` — connector names for your monitors
-
-**Required only if `wallpapers.cycling` is `true`:**
-- `wallpapers.day`, `wallpapers.night` — folders to pick from
-- `commands.wallpaper_set` — the command used to set the wallpaper
-
-**Everything else** is optional — missing `commands` entries will leave their settings panel buttons non-functional but won't crash the shell.
+If you have not yet created `config.json` see [Installation](#4-installation) above. All available keys and what they do:
 
 ```json
 {
