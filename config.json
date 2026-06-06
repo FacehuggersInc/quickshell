@@ -46,11 +46,11 @@
     "timeDateFormat": "%I:%M%p %a, %b %d",
     "theme": {
         "mode": "dark",
-        "background": "#00160f",
-        "surface": "#002821",
-        "primary": "#306c5b",
-        "secondary": "#1c5447",
-        "text": "#97eecb"
+        "background": "#001023",
+        "surface": "#0b2438",
+        "primary": "#49647d",
+        "secondary": "#344e65",
+        "text": "#bde1ff"
     },
     "launcherflags": {
         "maxOptions": 3,
@@ -234,7 +234,5 @@
         "#342e05",
         "#141414",
         "#799c56"
-    ],
-    "forceDarkMode": false,
-    "wallpaperMode": 0
+    ]
 }
