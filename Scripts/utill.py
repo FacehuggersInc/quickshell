@@ -23,7 +23,7 @@ CONFIG_DIR = Path(f"/home/{USERNAME}/.config/quickshell")
 CONFIG_JSON = CONFIG_DIR / "config.json"
 
 # Icon cache file
-ICON_CACHE = CONFIG_DIR / ".icon-cache"
+ICON_CACHE = CONFIG_DIR / ".icon-path-cache"
 
 # Icon search roots — add any extra icon theme directories here
 ICON_ROOTS = [
@@ -809,6 +809,12 @@ class Utill():
         """Read shell command history, filter out system/package/sudo commands.
         Checks bash, zsh, and fish history files.
         Returns newline-separated unique commands, most recent first.
+
+        NOTE: This filter is intentionally heavy — it strips sudo, package managers,
+        system utilities, git, file operations, shell builtins, and single-word commands.
+        The intent is to surface app launches and custom scripts only.
+        If a command you expect to see is missing, it is almost certainly being filtered.
+        To reduce filtering, edit the FILTER_PREFIXES list below.
         """
         # Commands to filter out — system, package management, sudo, etc.
         FILTER_PREFIXES = (

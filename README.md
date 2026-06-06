@@ -195,7 +195,7 @@ The table below documents what the shell is actually doing in the background. Th
 |---|---|
 | `--getcurrentplaying` | Polls MPRIS every 300ms when the audio popup is open — returns title, artist, album, art URL, source app and playback status |
 | `--getactiveapplications` | Polls every 650ms to build the app bar — returns all open windows with their class, PID, command, workspace and title |
-| `--getappicons` | Called when an app class name has no cached icon — fuzzy-matches the class name against icon files on disk and caches the result in `.icon-cache` |
+| `--getappicons` | Called when an app class name has no cached icon — fuzzy-matches the class name against icon files on disk and caches the result (class name → icon path) in `.icon-path-cache` |
 | `--getdesktopapps` | Called once when the "Add App" window opens — parses all `.desktop` files including Flatpak |
 | `--getnetworkinfo` | Polls every 1.5s when the network popup is open — samples `/proc/net/dev` twice 0.5s apart to calculate live speeds |
 | `--getaudiodevices` | Called when the audio popup opens — lists input and output devices via `wpctl status` |
@@ -465,9 +465,9 @@ Most polling uses `Timer` components with fixed intervals. These control how qui
 
 ## 13. First Run
 
-On the first launch the icon cache does not exist yet. `AppBarWidget` will call `--getappicons` which walks your entire icon theme directory to build it — this is a one-time operation and may take a few seconds. Subsequent launches read from the cache and are fast.
+On the first launch `.icon-path-cache` does not exist yet. `AppBarWidget` will call `--getappicons` which walks your icon theme directory and records each icon's name and path — this is a one-time operation and may take a few seconds. Subsequent launches read from the cache and are fast. The cache stores only class name → icon path mappings, not icon image data.
 
-The cache is stored at `~/.config/quickshell/.icon-cache`.
+The cache is stored at `~/.config/quickshell/.icon-path-cache`.
 
 ---
 
