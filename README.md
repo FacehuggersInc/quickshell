@@ -10,6 +10,8 @@ A Hyprland desktop shell built with Quickshell.
 > - **System Tray** icons are rendered as-is — coloured icons won't always match the shell's theme
 > - **Workspace switching and window hiding** are imperfect — behaviour can be inconsistent depending on the app
 > - **Widgets are static** — the bar layout is hardcoded in `MainWindow.qml`. There is currently no way to add, remove, or reorder widgets from `config.json` alone
+> - **Missing edge cases** — there are interactions and menu states that have not been fully accounted for. Some flows may behave unexpectedly or not work at all in certain situations
+> - **QoL settings are incomplete** — many things that would be useful to configure from the settings panel are not yet exposed there and require editing the config or source directly
 
 ---
 
@@ -260,6 +262,7 @@ If you have not yet created `config.json` see [Installation](#4-installation) ab
         "files_open":        "nautilus {path}",
         "colorpicker":       "hyprpicker",
         "editor":            "code",
+        "config_json":       "code /home/USER/.config/quickshell/config.json",
         "config_main":       "code /home/USER/.config/",
         "config_hypr":       "code /home/USER/.config/hypr/",
         "config_quickshell": "code /home/USER/.config/quickshell/",

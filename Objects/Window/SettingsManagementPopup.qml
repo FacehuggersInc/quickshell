@@ -312,15 +312,68 @@ PopupWindow {
                 spacing: 2
 
                 // ── WALLPAPER ─────────────────────────────────────
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 14
-
                 TextDivider {
                     dividerText: "Wallpaper"
                     dividerHeight: 2
                     Layout.fillWidth: true
                 }
+
+                // Cycling OFF — show stub instead of all wallpaper settings
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    visible: root.settings.wallpapers.cycling === false
+                    // NOTE: visible when cycling is explicitly false
+
+                    Text {
+                        text: "Wallpaper cycling is disabled."
+                        color: root.settings.theme.text
+                        font.family: root.settings.fontFamily
+                        font.pixelSize: 13
+                        font.weight: 600
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    Text {
+                        text: "All wallpaper settings are tied to the cycling system. To access interval, mode, and dark hour controls, enable cycling and configure your wallpaper folders in config.json."
+                        color: root.settings.theme.text
+                        opacity: 0.55
+                        font.family: root.settings.fontFamily
+                        font.pixelSize: 12
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                    }
+                    RoundButton {
+                        Layout.fillWidth: true
+                        text: "Enable Wallpaper Cycling"
+                        font.family: root.settings.fontFamily
+                        font.pixelSize: 13
+                        font.weight: 600
+                        padding: 8
+                        contentItem: Text {
+                            text: parent.text
+                            font: parent.font
+                            color: root.settings.theme.text
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+                        background: Rectangle {
+                            radius: 8
+                            color: root.settings.theme.primary
+                            opacity: 0.7
+                        }
+                        HoverHandler { cursorShape: Qt.PointingHandCursor }
+                        onClicked: {
+                            root.settings.wallpapers.cycling = true
+                            root.saveSettings()
+                        }
+                    }
+                }
+
+                // Cycling ON — show full wallpaper settings
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 14
+                    visible: root.settings.wallpapers.cycling !== false
 
                 // Wallpaper interval
                 RowLayout {
@@ -783,6 +836,8 @@ PopupWindow {
                     }
                 }
 
+                }  // end cycling-on ColumnLayout
+
                 // ── DISPLAY ───────────────────────────────────────
                 TextDivider {
                     dividerText: "Display"
@@ -935,8 +990,6 @@ PopupWindow {
                     }
                 }
 
-                }  // end Wallpaper/Display ColumnLayout
-
                 // ── QUICK ACCESS ──────────────────────────────────
                 TextDivider {
                     dividerText: "Quick Access"
@@ -995,6 +1048,12 @@ PopupWindow {
                     dividerText: "Configurations"
                     dividerHeight: 2
                     Layout.fillWidth: true
+                }
+                ActionRow {
+                    iconName: "settings"
+                    label: "Shell Config (config.json)"
+                    description: root.cmdDesc("config_json")
+                    onClicked: root.execute(root.cmd("config_json"))
                 }
                 ActionRow {
                     iconName: "settings"
