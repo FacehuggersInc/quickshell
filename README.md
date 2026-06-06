@@ -118,20 +118,23 @@ Log out and back in after.
 
 ## 4. Installation
 
+**Clone the config** — this places the shell config directly where Quickshell expects it:
+
 ```bash
 git clone https://github.com/FacehuggersInc/quickshell.git ~/.config/quickshell
 ```
 
-**Set your username in `utill.py`** — open `~/.config/quickshell/Scripts/utill.py` and update the user configuration block at the top:
+**Create your `config.json`** — the shell will not start without it. Create it manually at `~/.config/quickshell/config.json` using the [Configuration](#7-configuration) section as a reference. At minimum you need `displays`, `wallpapers`, `iconsPath`, `fontFamily`, `theme`, and `commands`.
 
-```python
-# ── USER CONFIGURATION ────────────────────────────────────────
-USERNAME = "youruser"   # change this to your Linux username
+
+**Start `awww` before Quickshell** — add this to your `~/.config/hypr/hyprland.conf` so the wallpaper daemon is running before the shell tries to set wallpapers:
+
+```
+exec-once = awww-daemon
+exec-once = quickshell
 ```
 
-This controls where the script looks for your config, icon cache, and icon directories. Everything else derives from it automatically.
-
-> **`theme.py` must also be present** in `~/.config/quickshell/Scripts/` alongside `utill.py`. It is imported directly — if it is missing every `utill.py` call will crash and the shell will not function.
+> **`theme.py` must be present** in `~/.config/quickshell/Scripts/` alongside `utill.py`. It is included in the repo — if it is missing every `utill.py` call will crash and the shell will not function.
 
 ---
 
@@ -228,30 +231,41 @@ If any package is missing the affected features will silently fail or return emp
 
 ## 7. Configuration
 
-`config.json` does not exist by default — create it at `~/.config/quickshell/config.json`. Required keys are marked, all others are optional.
+`config.json` does not exist by default — create it at `~/.config/quickshell/config.json`.
+
+**Always required:**
+- `iconsPath`, `fontFamily`, `theme` — core appearance
+- `commands.terminal` and `commands.terminal_run` — used by the run command and command history
+- `displays` — connector names for your monitors
+
+**Required only if `wallpapers.cycling` is `true`:**
+- `wallpapers.day`, `wallpapers.night` — folders to pick from
+- `commands.wallpaper_set` — the command used to set the wallpaper
+
+**Everything else** is optional — missing `commands` entries will leave their settings panel buttons non-functional but won't crash the shell.
 
 ```json
 {
+    "displays":            ["DP-1", "HDMI-A-1"], // required — connector names, left to right
+    "primaryDisplayIndex": 0,                    // which display is used for theme/color sampling
     "wallpapers": {
-        "displays":   ["DP-1", "HDMI-A-1"],        // required — connector names, left to right
-        "day":        "/path/to/wallpapers/day/",   // required — trailing slash needed
-        "night":      "/path/to/wallpapers/night/", // required — trailing slash needed
-        "interval":   600000,                        // ms between wallpaper changes
-        "primaryDisplayIndex": 0,                    // index into displays array — the wallpaper on this display is treated as the "current wallpaper" for theme generation and color sampling
-        "randomWallpaperPerDisplay": true,           // different wallpaper per display
-        "smartCrop":      false,                     // auto-crop for vertical monitors
-        "wallpaperMode":  0,                         // 0=auto, 1=force day, 2=force night
-        "cycling":    true,                          // set to false to disable wallpaper cycling entirely
-        "autoTheme":  false,                         // generate theme colors from current wallpaper
+        "cycling":            true,              // set false to skip all wallpaper handling
+        "day":        "/path/to/day/",           // required if cycling — trailing slash needed
+        "night":      "/path/to/night/",         // required if cycling — trailing slash needed
+        "interval":   600000,                    // ms between wallpaper changes
+        "randomWallpaperPerDisplay": true,       // different wallpaper per display
+        "smartCrop":      false,                 // auto-crop for vertical monitors
+        "wallpaperMode":  0,                     // 0=auto, 1=force day, 2=force night
+        "autoTheme":      false,                 // generate theme from current wallpaper
         "darkModeHours": {
-            "at":     21,                            // hour to switch to night (24h)
-            "before": 6                              // hour to switch to day (24h)
+            "at":     21,                        // hour to switch to night (24h)
+            "before": 6                          // hour to switch to day (24h)
         }
     },
     "commands": {
-        "terminal":          "ghostty",              // required
-        "terminal_run":      "ghostty -e bash -c",   // required — the command to run is appended as an arg
-        "wallpaper_set":     "awww img -o {display} {wallpaper}", // required
+        "terminal":          "ghostty",          // required
+        "terminal_run":      "ghostty -e bash -c", // required
+        "wallpaper_set":     "awww img -o {display} {wallpaper}", // required if cycling
         "screenshot":        "flameshot gui",
         "files":             "nautilus",
         "files_open":        "nautilus {path}",
@@ -260,6 +274,7 @@ If any package is missing the affected features will silently fail or return emp
         "config_main":       "code /home/USER/.config/",
         "config_hypr":       "code /home/USER/.config/hypr/",
         "config_quickshell": "code /home/USER/.config/quickshell/",
+        "lock":              "loginctl lock-session",
         "suspend":           "systemctl suspend",
         "reboot":            "systemctl reboot",
         "poweroff":          "systemctl poweroff",
@@ -267,24 +282,24 @@ If any package is missing the affected features will silently fail or return emp
         "restart_shell":     "/home/USER/.config/quickshell/Scripts/restart.sh",
         "hypr_reload":       "hyprctl reload"
     },
-    "iconsPath":  "/path/to/icons/",                 // required — trailing slash needed
-    "fontFamily":      "JetBrainsMono",              // required
-    "dateTimeFormat":  "%I:%M%p %a, %b %d",          // datetime widget format (strftime) — must be installed on your system
+    "iconsPath":       "/path/to/icons/",        // required — trailing slash needed
+    "fontFamily":      "JetBrainsMono",          // required
+    "dateTimeFormat":  "%I:%M%p %a, %b %d",      // strftime format for the clock widget
     "theme": {
-        "background": "#19090e",                     // required
-        "surface":    "#2b1e22",                     // required
-        "primary":    "#6b5d62",                     // required
+        "background": "#19090e",                 // required
+        "surface":    "#2b1e22",                 // required
+        "primary":    "#6b5d62",                 // required
         "secondary":  "#55474c",
-        "text":       "#e7d9df"                      // required
+        "text":       "#e7d9df"                  // required
     },
-    "variables": {},               // optional — referenced in commands as {v-key}
-    "wallpaperMode":          0,    // 0=auto, 1=force day, 2=force night
-    "colorHistory":           [],
+    "variables":   {},                           // optional — referenced in commands as {v-key}
+    "forceDarkMode": false,
+    "colorHistory": [],
     "launcherflags": {
         "maxOptions":    3,
         "filters":       {},   // class: [args to strip]
         "setOptions":    {},
-        "lockOptions":   [],   // class names — never update options
+        "lockOptions":   [],   // class names — never auto-update options
         "ignoreOptions": []    // class names — never show options
     },
     "launchers": []
