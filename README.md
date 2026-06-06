@@ -1,5 +1,7 @@
 # Quickshell — Arch Linux / Hyprland
 
+![Preview](Assets/Previews/preview1.png)
+
 A Hyprland desktop shell built with Quickshell.
 
 > ⚠️ **Work in Progress**
@@ -66,7 +68,9 @@ sudo pacman -S libnotify
 
 **Apps used by default commands** — these match the defaults in `config.json` but can be swapped for alternatives:
 ```bash
-sudo pacman -S nautilus ghostty flameshot hyprpicker
+sudo pacman -S nautilus ghostty hyprpicker
+sudo pacman -S grim slurp wl-clipboard jq libnotify
+yay -S hyprshot
 ```
 
 **Wayland/Hyprland integration:**
@@ -261,7 +265,7 @@ If you have not yet created `config.json` see [Installation](#4-installation) ab
         "terminal":          "ghostty",          // required
         "terminal_run":      "ghostty -e bash -c", // required
         "wallpaper_set":     "awww img -o {display} {wallpaper}", // required if cycling
-        "screenshot":        "flameshot gui",
+        "screenshot":        "hyprshot -m region --clipboard-only -z",
         "files":             "nautilus",
         "files_open":        "nautilus {path}",
         "colorpicker":       "hyprpicker",
