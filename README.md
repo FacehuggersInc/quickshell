@@ -226,7 +226,8 @@ If any package is missing the affected features will silently fail or return emp
         "interval":   600000,                        // ms between wallpaper changes
         "primaryDisplayIndex": 0,                    // index into displays array — the wallpaper on this display is treated as the "current wallpaper" for theme generation and color sampling
         "randomWallpaperPerDisplay": true,           // different wallpaper per display
-        "smartCrop":  false,                         // auto-crop for vertical monitors
+        "smartCrop":      false,                     // auto-crop for vertical monitors
+        "wallpaperMode":  0,                         // 0=auto, 1=force day, 2=force night
         "cycling":    true,                          // set to false to disable wallpaper cycling entirely
         "autoTheme":  false,                         // generate theme colors from current wallpaper
         "darkModeHours": {
@@ -254,7 +255,8 @@ If any package is missing the affected features will silently fail or return emp
         "hypr_reload":       "hyprctl reload"
     },
     "iconsPath":  "/path/to/icons/",                 // required — trailing slash needed
-    "fontFamily": "JetBrainsMono",                   // required — must be installed on your system
+    "fontFamily":      "JetBrainsMono",              // required
+    "dateTimeFormat":  "%I:%M%p %a, %b %d",          // datetime widget format (strftime) — must be installed on your system
     "theme": {
         "background": "#19090e",                     // required
         "surface":    "#2b1e22",                     // required
@@ -264,7 +266,6 @@ If any package is missing the affected features will silently fail or return emp
     },
     "variables": {},               // optional — referenced in commands as {v-key}
     "wallpaperMode":          0,    // 0=auto, 1=force day, 2=force night
-    "volumePercentageOffset": 0,
     "colorHistory":           [],
     "launcherflags": {
         "maxOptions":    3,

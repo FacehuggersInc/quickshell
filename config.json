@@ -1,15 +1,15 @@
 {
+    "displays": [
+        "DP-2",
+        "HDMI-A-1",
+        "DP-1"
+    ],
+    "primaryDisplayIndex": 1,
     "wallpapers": {
         "darkModeHours": {
             "before": 5,
             "at": 21
         },
-        "displays": [
-            "DP-2",
-            "HDMI-A-1",
-            "DP-1"
-        ],
-        "primaryDisplayIndex": 1,
         "randomWallpaperPerDisplay": true,
         "interval": 600000,
         "cycling": true,
@@ -24,7 +24,7 @@
     "commands": {
         "terminal": "ghostty",
         "terminal_run": "ghostty -e bash -c",
-        "screenshot": "flameshot gui",
+        "screenshot": "flameshot launcher",
         "files": "nautilus",
         "files_open": "nautilus {path}",
         "colorpicker": "hyprpicker",
@@ -41,15 +41,15 @@
         "wallpaper_set": "awww img -o {display} {wallpaper}"
     },
     "iconsPath": "/home/fach/.local/share/icons/material/",
-    "volumePercentageOffset": 0,
     "fontFamily": "JetBrainsMono",
+    "timeDateFormat": "%I:%M%p %a, %b %d",
     "theme": {
         "mode": "dark",
-        "background": "#2a0000",
-        "surface": "#3d140f",
-        "primary": "#815730",
-        "secondary": "#6a4025",
-        "text": "#ffd76d"
+        "background": "#00160f",
+        "surface": "#002821",
+        "primary": "#306c5b",
+        "secondary": "#1c5447",
+        "text": "#97eecb"
     },
     "launcherflags": {
         "maxOptions": 3,

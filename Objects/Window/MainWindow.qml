@@ -91,7 +91,7 @@ PanelWindow {
                     ColorPickerWidget {}
                     VolumeWidget {}
                     DatetimeWidget { 
-                        format: "%I:%M%p %a, %b %d"
+                        format: root.settings.timeDateFormat
                         textColor: '#7be376'
                     }
                     InterfaceWidget {}

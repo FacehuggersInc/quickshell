@@ -628,7 +628,7 @@ PopupWindow {
                                         anchors.fill: parent
                                         onClicked: {
                                             root.wallpaperMode = modelData.mode
-                                            root.settings.wallpaperMode = modelData.mode
+                                            root.settings.wallpapers.wallpaperMode = modelData.mode
                                             root.saveSettings()
                                             root.nextWallpaper()
                                         }

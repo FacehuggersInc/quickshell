@@ -10,13 +10,11 @@ import Quickshell.Hyprland
 import qs.Objects.Design
 import qs.Objects.Widgets
 
-// Full-height side panel anchored to the right of the screen,
-// starting just below the bar (mainWindow.height).
 PopupWindow {
     id: notificationsPanel
 
     anchor.window: mainWindow
-    anchor.rect.x: Screen.width          // will be corrected in open()
+    anchor.rect.x: Screen.width
     anchor.rect.y: mainWindow.height + 5
 
     implicitWidth: 400
@@ -30,7 +28,6 @@ PopupWindow {
     property bool isOpen: false
     property bool isAnimating: false
 
-    // ── Slide animation ──────────────────────────────────────────
     PropertyAnimation {
         id: slideAnim
         target: panelBackground
@@ -61,13 +58,11 @@ PopupWindow {
         onCleared: notificationsPanel.close()
     }
 
-    // ── Panel background ─────────────────────────────────────────
     RoundedBlock {
         id: panelBackground
         width: notificationsPanel.implicitWidth
         height: notificationsPanel.implicitHeight
         alpha: 0
-        // starts off-screen to the right
         x: notificationsPanel.implicitWidth
         y: 0
         radius: 12
@@ -78,10 +73,9 @@ PopupWindow {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: 0
             spacing: 0
 
-            // ── Header ───────────────────────────────────────────
+            // ── Header ────────────────────────────────────────────
             RowLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 12
@@ -99,7 +93,6 @@ PopupWindow {
                     Layout.fillWidth: true
                 }
 
-                // Count badge
                 Rectangle {
                     visible: root.notifyServer.trackedNotifications.values.length > 0
                     width: countText.implicitWidth + 16
@@ -119,7 +112,6 @@ PopupWindow {
                     }
                 }
 
-                // Dismiss all button
                 RoundButton {
                     visible: root.notifyServer.trackedNotifications.values.length > 0
                     text: "Clear all"
@@ -127,7 +119,6 @@ PopupWindow {
                     font.pixelSize: 13
                     padding: 5
                     horizontalPadding: 10
-
                     contentItem: Text {
                         text: parent.text
                         font: parent.font
@@ -142,7 +133,6 @@ PopupWindow {
                     HoverHandler { cursorShape: Qt.PointingHandCursor }
                     onClicked: {
                         var notifs = root.notifyServer.trackedNotifications.values
-                        // iterate backwards so dismiss doesn't shift indices
                         for (var i = notifs.length - 1; i >= 0; i--) {
                             notifs[i].dismiss()
                         }
@@ -168,30 +158,38 @@ PopupWindow {
                 opacity: 0.1
             }
 
-            // ── Notification list ─────────────────────────────────
+            // ── Notification list — properly scrollable ────────────
             ScrollView {
+                id: notifScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.topMargin: 8
                 Layout.bottomMargin: 8
                 clip: true
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
-
-                // Empty state
-                Text {
-                    anchors.centerIn: parent
-                    visible: root.notifyServer.trackedNotifications.values.length === 0
-                    text: "No notifications"
-                    color: root.settings.theme.text
-                    opacity: 0.4
-                    font.family: root.settings.fontFamily
-                    font.pixelSize: 16
-                }
+                ScrollBar.vertical.policy: ScrollBar.AsNeeded
+                // contentHeight must be set explicitly for scroll to work
+                contentHeight: notifColumn.implicitHeight
+                contentWidth: notificationsPanel.implicitWidth - 32
 
                 ColumnLayout {
+                    id: notifColumn
                     width: notificationsPanel.implicitWidth - 32
-                    anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 8
+                    // Keep the x centred within the ScrollView viewport
+                    x: 16
+
+                    // Empty state
+                    Text {
+                        visible: root.notifyServer.trackedNotifications.values.length === 0
+                        text: "No notifications"
+                        color: root.settings.theme.text
+                        opacity: 0.4
+                        font.family: root.settings.fontFamily
+                        font.pixelSize: 16
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.topMargin: 24
+                    }
 
                     Repeater {
                         model: root.notifyServer.trackedNotifications
@@ -202,18 +200,19 @@ PopupWindow {
                             notification: modelData
                         }
                     }
+
+                    // Bottom breathing room
+                    Item { implicitHeight: 8 }
                 }
             }
         }
     }
 
-    // ── Open / close API ─────────────────────────────────────────
     function open() {
         if (isOpen || isAnimating) return
         isOpen = true
         isAnimating = true
 
-        // Position panel flush to the right edge of the screen
         notificationsPanel.anchor.rect.x = Screen.width - notificationsPanel.implicitWidth - 8
         panelBackground.x = notificationsPanel.implicitWidth
         panelBackground.alpha = 0

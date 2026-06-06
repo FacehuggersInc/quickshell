@@ -14,7 +14,7 @@ RowLayout{
     spacing: 0
 
     function getStyleFromPercentage(str){
-        var num = parseInt(str) - root.settings.volumePercentageOffset
+        var num = parseInt(str)
         if (num >= 60){
             return ['#ff4a4a', "volume_max", num]
         } else if (num >= 50) {

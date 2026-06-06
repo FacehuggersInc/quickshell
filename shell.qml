@@ -49,7 +49,7 @@ ShellRoot {
         }
     }
     // wallpaperMode: 0=auto (follow dark hours), 1=force day, 2=force night
-    property int wallpaperMode: root.settings.wallpaperMode || 0
+    property int wallpaperMode: root.settings.wallpapers.wallpaperMode || 0
 
 
     // FUNCTIONS
@@ -460,7 +460,7 @@ ShellRoot {
     Process{
         id: wallpaperRandomChoice
         property string wallpaperFolder: settings.wallpapers.day; 
-        property int wallpapersToGet: settings.wallpapers.randomWallpaperPerDisplay ? settings.wallpapers.displays.length : 1
+        property int wallpapersToGet: settings.wallpapers.randomWallpaperPerDisplay ? settings.displays.length : 1
         command: newUtill( ["--randomfile", wallpaperRandomChoice.wallpaperFolder, wallpaperRandomChoice.wallpapersToGet] )
         stdout : StdioCollector {
             onStreamFinished: {
@@ -470,10 +470,10 @@ ShellRoot {
                     || settings.wallpapers.setWallpaperCommand
                     || "awww img -o {display} {wallpaper}"
                 var setWallpaperCommand = rawCommand
-                for (var i = 0; i < settings.wallpapers.displays.length; i++) {
+                for (var i = 0; i < settings.displays.length; i++) {
                     setWallpaperCommand = rawCommand
                     
-                    setWallpaperCommand = setWallpaperCommand.replace( "{display}", settings.wallpapers.displays[i] )
+                    setWallpaperCommand = setWallpaperCommand.replace( "{display}", settings.displays[i] )
 
                     var wallpaper = null
                     if (settings.wallpapers.randomWallpaperPerDisplay) {
@@ -485,7 +485,7 @@ ShellRoot {
                     // Smart crop for vertical monitors if setting enabled
                     var finalWallpaper = wallpaper
                     if (settings.wallpapers.smartCrop) {
-                        var displayName = settings.wallpapers.displays[i]
+                        var displayName = settings.displays[i]
                         var monRes = root.monitorResolutions[displayName]
                         if (monRes && monRes.h > monRes.w) {
                             // Vertical monitor — run smartcrop synchronously via proc
@@ -497,19 +497,19 @@ ShellRoot {
                             smartCropProc.monH        = monRes.h
                             smartCropProc.displayName = displayName
                             smartCropProc.rawCommand  = setWallpaperCommand
-                                .replace("{display}", settings.wallpapers.displays[i])
+                                .replace("{display}", settings.displays[i])
                             smartCropProc.running     = true
                             continue  // handled by smartCropProc
                         }
                     }
 
                     var wallpaperCmd = setWallpaperCommand
-                        .replace("{display}", settings.wallpapers.displays[i])
+                        .replace("{display}", settings.displays[i])
                         .replace("{wallpaper}", finalWallpaper)
                     execute( wallpaperCmd.split(" ") )
                 }
                 
-                root.wallpaperColors.source = Qt.resolvedUrl(wallpapers[settings.wallpapers.primaryDisplayIndex].trim())
+                root.wallpaperColors.source = Qt.resolvedUrl(wallpapers[settings.primaryDisplayIndex].trim())
                 themeCheckTimer.repeat = true
                 themeCheckTimer.running = true
             }
