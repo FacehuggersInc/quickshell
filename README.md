@@ -1,6 +1,6 @@
 # Quickshell — Arch Linux / Hyprland
 
-![Preview](Assets/Previews/preview_A.png?v=2)
+![Preview](Assets/Previews/preview_A.png)
 
 A Hyprland desktop shell built with Quickshell.
 
@@ -241,8 +241,8 @@ If you have not yet created `config.json` see [Installation](#4-installation) ab
 
 ```json
 {
-    "displays":            ["DP-1", "HDMI-A-1"], // required — connector names, left to right
-    "primaryDisplayIndex": 0,                    // which display is used for theme/color sampling
+    "displays":            ["DP-1", "HDMI-A-1"], // required if cycling — connector names, left to right
+    "primaryDisplayIndex": 0,                    // required if cycling — used for theme/color sampling
     "wallpapers": {
         "cycling":            true,              // set false to skip all wallpaper handling
         "day":        "/path/to/day/",           // required if cycling — trailing slash needed
