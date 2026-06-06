@@ -1,6 +1,19 @@
 # Quickshell — Arch Linux / Hyprland
 
-A Hyprland desktop shell built with Quickshell. Requires a **Wayland session** — does not work under X11.
+A Hyprland desktop shell built with Quickshell.
+
+> ⚠️ **Work in Progress**
+>
+> This config is functional but not finished. Known issues and limitations:
+>
+> - **Tooltips** don't always align correctly, particularly inside popups and menus
+> - **System Tray** icons are rendered as-is — coloured icons won't always match the shell's theme
+> - **Workspace switching and window hiding** are imperfect — behaviour can be inconsistent depending on the app
+> - **Widgets are static** — the bar layout is hardcoded in `MainWindow.qml`. There is currently no way to add, remove, or reorder widgets from `config.json` alone
+
+---
+
+ Requires a **Wayland session** — does not work under X11.
 
 ---
 
