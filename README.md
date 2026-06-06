@@ -27,7 +27,7 @@ sudo pacman -S quickshell python \
     qt6-base qt6-declarative qt6-wayland qt6-tools
 ```
 
-**Wallpaper — required for wallpaper cycling:**
+**Wallpaper — only needed if `wallpapers.cycling` is `true` in your config. `awww` is the default but any wallpaper tool can be used by changing `commands.wallpaper_set`:**
 ```bash
 sudo pacman -S awww
 ```
@@ -124,10 +124,10 @@ Log out and back in after.
 git clone https://github.com/FacehuggersInc/quickshell.git ~/.config/quickshell
 ```
 
-**Create your `config.json`** — the shell will not start without it. Create it manually at `~/.config/quickshell/config.json` using the [Configuration](#7-configuration) section as a reference. At minimum you need `displays`, `wallpapers`, `iconsPath`, `fontFamily`, `theme`, and `commands`.
+**Create your `config.json`** — the shell will not start without it. Create it manually at `~/.config/quickshell/config.json` using the [Configuration](#7-configuration) section as a reference. At minimum you need `displays`, `iconsPath`, `fontFamily`, `theme`, and `commands.terminal`. Wallpaper keys are only needed if `wallpapers.cycling` is `true` — see the [Configuration](#7-configuration) section for what is truly required.
 
 
-**Start `awww` before Quickshell** — add this to your `~/.config/hypr/hyprland.conf` so the wallpaper daemon is running before the shell tries to set wallpapers:
+**Start your wallpaper daemon before Quickshell** — only needed if `wallpapers.cycling` is `true`. If using `awww` add this to your `~/.config/hypr/hyprland.conf`. Swap `awww-daemon` for whatever daemon your chosen tool requires, or skip this entirely if you are not using wallpaper cycling:
 
 ```
 exec-once = awww-daemon
