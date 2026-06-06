@@ -1,6 +1,6 @@
 # Quickshell — Arch Linux / Hyprland
 
-![Preview](Assets/Previews/preview1.png?v=2)
+![Preview](Assets/Previews/preview_A.png?v=2)
 
 A Hyprland desktop shell built with Quickshell.
 
