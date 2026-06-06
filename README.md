@@ -347,7 +347,9 @@ Theme colors are set manually in `config.json` under the `theme` key. If you wan
 python3 ~/.config/quickshell/Scripts/utill.py --generatetheme dark #19090e #6b5d62
 ```
 
-Setting `"autoTheme": true` in `wallpapers` enables automatic theme generation — every time the wallpaper changes, colors are sampled from it and the theme is updated and saved to `config.json` automatically. Disable this if you want to keep a fixed theme.
+**Auto theming** — setting `"autoTheme": true` in `wallpapers` enables automatic theme generation. Every time the wallpaper changes, colors are sampled from it and the theme is updated and saved to `config.json` automatically.
+
+> **`autoTheme` requires `wallpapers.cycling` to also be `true`.** The theme is generated as a side effect of a wallpaper being set — if cycling is disabled, no wallpaper is ever applied by the shell and `autoTheme` will never fire. The initial theme on startup also depends on cycling running at least once to sample colors. If you want a fixed theme, set `autoTheme: false` and define your colors manually in `config.json` — this works regardless of whether cycling is on or off.
 
 ---
 
